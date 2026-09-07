@@ -188,7 +188,7 @@
             @if (a.scientificName) {
               <span class="scientific-name"><em>{{ a.scientificName }}</em></span>
             }
-            @if (a.authorship) {
+            @if (a.authorship && !a.scientificName?.includes(a.authorship)) {
               <span class="authorship-label">{{ a.authorship }}</span>
             }
           </div>
@@ -391,12 +391,14 @@
                         @if (desc.description !== a.description) {
                           <article class="sub-description-item">
                             <h4 class="sub-desc-heading">
-                              {{ formatDescriptionType(desc.type) }}
+                              <span>{{ formatDescriptionType(desc.type) }}</span>
                               @if (desc.language) {
                                 <span class="lang-tag">{{ desc.language }}</span>
                               }
                             </h4>
-                            <p class="sub-desc-text">{{ desc.description }}</p>
+                            <p class="sub-desc-text" [class.is-boolean-pill]="isBooleanTrait(desc.description)">
+                              {{ formatDescriptionValue(desc.description) }}
+                            </p>
                             @if (desc.source) {
                               <span class="sub-desc-source">Source: {{ desc.source }}</span>
                             }

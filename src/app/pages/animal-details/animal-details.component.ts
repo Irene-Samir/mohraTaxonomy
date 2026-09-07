@@ -156,7 +156,23 @@ export class AnimalDetailsComponent implements OnInit {
     if (!type) return 'General';
     return type
       .replace(/_/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
+      .toLowerCase()
+      .replace(/(?:^|\s)\p{L}/gu, c => c.toUpperCase());
+  }
+
+  formatDescriptionValue(val: string): string {
+    if (!val) return '';
+    const trimmed = val.trim();
+    const upper = trimmed.toUpperCase();
+    if (upper === 'FALSO' || upper === 'FALSE') return 'False';
+    if (upper === 'VERDADERO' || upper === 'TRUE') return 'True';
+    return trimmed;
+  }
+
+  isBooleanTrait(val: string): boolean {
+    if (!val) return false;
+    const u = val.trim().toUpperCase();
+    return u === 'FALSO' || u === 'FALSE' || u === 'VERDADERO' || u === 'TRUE';
   }
 
   // Common Names Toggle

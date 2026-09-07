@@ -682,8 +682,17 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  .page-header {
+    padding: var(--spacing-lg) 0 var(--spacing-md);
+  }
+
   .page-title {
-    font-size: 2.15rem;
+    font-size: 1.85rem;
+  }
+
+  .page-description {
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-md);
   }
 
   .tree-controls-bar {
@@ -693,6 +702,7 @@
 
   .search-input-group {
     max-width: 100%;
+    flex: 1 1 auto;
   }
 
   .tree-actions-row {
@@ -700,13 +710,110 @@
   }
 
   .taxonomy-tree-card {
-    padding: var(--spacing-md);
-    border-radius: var(--radius-xl);
+    padding: 0.75rem 0.5rem;
+    border-radius: var(--radius-lg);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .tree-root-container {
+    min-width: 0;
+  }
+
+  /* Compact indentation per depth level on mobile */
+  .tree-children-container {
+    margin-top: 0.35rem;
+    gap: 0.35rem;
+    margin-left: 0.55rem;
+    padding-left: 0.5rem;
+    border-left: 1.5px solid #DCE7DF;
+  }
+
+  .tree-children-container > .tree-node-wrapper::before {
+    top: 1.15rem;
+    left: -0.5rem;
+    width: 0.45rem;
+    height: 1.5px;
   }
 
   .node-card {
-    padding: 0.6rem 0.75rem;
-    gap: 0.45rem;
+    padding: 0.4rem 0.5rem;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .tree-node-wrapper[style*="--node-depth:0"] > .node-card {
+    padding: 0.55rem 0.75rem;
+    border-left-width: 3px;
+  }
+
+  .tree-node-wrapper[style*="--node-depth:0"] .taxon-name {
+    font-size: 0.95rem;
+  }
+
+  .node-indicator-slot {
+    width: 24px;
+    height: 24px;
+  }
+
+  .toggle-btn {
+    width: 24px;
+    height: 24px;
+  }
+
+  .chevron-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .leaf-indicator {
+    width: 24px;
+    height: 24px;
+  }
+
+  .rank-badge {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.65rem;
+    gap: 0.2rem;
+  }
+
+  .rank-icon {
+    font-size: 0.725rem;
+  }
+
+  .taxon-name {
+    font-size: 0.85rem;
+  }
+
+  /* Hide sub-taxa count pill on mobile to preserve horizontal space */
+  .children-count-pill {
+    display: none !important;
+  }
+
+  .category-fav-toggle-btn {
+    width: 28px;
+    height: 28px;
+    margin-right: 0.2rem;
+  }
+
+  .category-fav-toggle-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .view-animals-node-btn {
+    padding: 0.3rem 0.45rem;
+    gap: 0;
+  }
+
+  .view-animals-node-btn span {
+    display: none !important;
+  }
+
+  .view-animals-node-btn .arrow-icon {
+    width: 13px;
+    height: 13px;
   }
 
   .search-result-row {
@@ -721,23 +828,56 @@
 
 @media (max-width: 480px) {
   .page-title {
-    font-size: 1.75rem;
+    font-size: 1.55rem;
+  }
+
+  .tree-children-container {
+    margin-left: 0.38rem;
+    padding-left: 0.35rem;
+    border-left-width: 1.5px;
+  }
+
+  .tree-children-container > .tree-node-wrapper::before {
+    top: 1.05rem;
+    left: -0.35rem;
+    width: 0.3rem;
+  }
+
+  .node-card {
+    padding: 0.35rem 0.4rem;
+    gap: 0.25rem;
   }
 
   .taxon-name {
-    font-size: 0.925rem;
+    font-size: 0.8rem;
   }
 
   .rank-badge {
-    padding: 0.18rem 0.5rem;
-    font-size: 0.65rem;
+    padding: 0.12rem 0.35rem;
+    font-size: 0.58rem;
   }
 
-  .view-animals-node-btn span {
-    display: none;
+  .category-fav-toggle-btn {
+    width: 26px;
+    height: 26px;
+    margin-right: 0.15rem;
+  }
+
+  .category-fav-toggle-btn svg {
+    width: 12px;
+    height: 12px;
   }
 
   .view-animals-node-btn {
-    padding: 0.35rem;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .tree-rank-legend {
+    gap: 0.35rem;
+  }
+
+  .tree-rank-legend .rank-badge {
+    font-size: 0.6rem;
+    padding: 0.12rem 0.35rem;
   }
 }
