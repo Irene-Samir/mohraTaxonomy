@@ -890,3 +890,47 @@
     justify-content: center;
   }
 }
+
+@media (max-width: 640px) {
+  .section-header-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .section-title-group {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .dashboard-section {
+    padding: 1rem;
+    border-radius: var(--radius-xl);
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+  }
+
+  .count-pill {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .section-action-link {
+    font-size: 0.8rem;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
+  }
+
+  .sidebar-nav-item {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.825rem;
+  }
+
+  .stat-card {
+    padding: 0.75rem 0.85rem;
+  }
+}

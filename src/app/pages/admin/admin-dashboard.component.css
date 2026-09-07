@@ -1427,3 +1427,195 @@
     align-items: flex-start;
   }
 }
+
+@media (max-width: 640px) {
+  .admin-title {
+    font-size: 1.5rem;
+  }
+
+  .admin-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.5rem;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Top Stats Cards in 2 columns with compact layout */
+  .stats-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat-card {
+    padding: 0.65rem 0.6rem;
+    gap: 0.45rem;
+    min-width: 0;
+  }
+
+  .stat-icon-wrap {
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+
+  /* Tab Navigation bar */
+  .admin-tabs-nav {
+    gap: 0.2rem;
+  }
+
+  .tab-btn {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.825rem;
+  }
+
+  /* Toolbar and Box Headers */
+  .section-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .search-input-box {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .section-top-bar .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .box-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .box-header .btn {
+    align-self: flex-start;
+  }
+
+  /* Animal Image Gallery */
+  .admin-image-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .image-thumb-wrap {
+    height: 115px;
+  }
+
+  /* Taxonomy Tree Hierarchy */
+  .taxonomy-tree-container {
+    overflow-x: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tree-node-row {
+    padding: 0.35rem 0.5rem;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .tree-toggle-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+  }
+
+  .rank-badge {
+    font-size: 0.6rem;
+    padding: 0.12rem 0.35rem;
+  }
+
+  .node-name {
+    font-size: 0.8rem;
+    min-width: 0;
+  }
+
+  .node-name strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .node-actions {
+    gap: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .action-icon-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tree-children-container {
+    padding-left: 0.6rem;
+    margin-left: 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card.p-xl {
+    padding: 0.85rem;
+  }
+
+  .stats-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  .stat-card {
+    padding: 0.55rem 0.5rem;
+  }
+
+  .stat-icon-wrap {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.15rem;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+  }
+
+  .tree-children-container {
+    padding-left: 0.45rem;
+    margin-left: 0.25rem;
+  }
+
+  .node-name strong {
+    max-width: 70px;
+  }
+}
