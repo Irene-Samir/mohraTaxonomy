@@ -666,10 +666,12 @@
 .explorer-viewport-col {
   position: relative;
   width: 100%;
+  max-width: 100%;
   min-height: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 /* Zoom Transition (550ms smooth timing) */
@@ -1264,7 +1266,70 @@
 
   .explorer-stage-grid {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 40px;
+  }
+
+  .explorer-viewport-col {
+    min-height: auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .explorer-zoom-stage {
+    height: auto;
+    min-height: 460px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .central-active-hub {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 0 auto 32px;
+  }
+
+  .hub-core-card {
+    width: 180px;
+    height: 180px;
+  }
+
+  .ring-outer {
+    width: 230px;
+    height: 230px;
+  }
+
+  .ring-inner {
+    width: 205px;
+    height: 205px;
+  }
+
+  .hub-taxonomy-name {
+    font-size: 1.4rem;
+  }
+
+  .orbiting-children-cluster {
+    position: relative;
+    inset: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .orbiting-child-node {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none !important;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .explorer-svg-canvas {
+    display: none;
   }
 
   .why-grid {
@@ -1274,15 +1339,50 @@
 
 @media (max-width: 767px) {
   .section {
-    padding: 56px 0;
+    padding: 48px 0;
   }
 
   .hero-title {
-    font-size: 2.4rem;
+    font-size: 2.1rem;
+    line-height: 1.2;
   }
 
   .section-title {
-    font-size: 2.1rem;
+    font-size: 1.85rem;
+  }
+
+  /* Responsive Hero Stats Box - Perfectly fitting 3 columns */
+  .hero-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 100%;
+    padding: 14px 16px;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+    white-space: nowrap;
+  }
+
+  .stat-label {
+    font-size: 0.68rem;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .stat-divider {
+    height: 28px;
+    flex-shrink: 0;
   }
 
   .explorer-nav-bar {
@@ -1306,55 +1406,40 @@
   }
 
   .explorer-zoom-stage {
-    height: auto;
-    min-height: 520px;
+    min-height: auto;
   }
 
   .central-active-hub {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    margin: 0 auto 36px;
+    margin: 0 auto 24px;
   }
 
   .hub-core-card {
-    width: 185px;
-    height: 185px;
+    width: 155px;
+    height: 155px;
+    padding: 14px;
+  }
+
+  .hub-icon {
+    font-size: 2.2rem;
+    margin-bottom: 4px;
   }
 
   .hub-taxonomy-name {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
   }
 
   .orbiting-children-cluster {
-    position: relative;
-    inset: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    width: 100%;
-  }
-
-  .orbiting-child-node {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none !important;
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .explorer-svg-canvas {
-    display: none;
+    gap: 10px;
   }
 
   .floating-glass-card {
-    padding: 24px 20px;
+    padding: 20px 16px;
   }
 
   .panel-taxon-name {
-    font-size: 1.55rem;
+    font-size: 1.45rem;
   }
 
   .why-grid {
@@ -1362,6 +1447,39 @@
   }
 
   .cta-heading {
+    font-size: 1.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+
+  .hero-stats {
+    padding: 10px 8px;
+    gap: 6px;
+  }
+
+  .stat-number {
+    font-size: 1.1rem;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+  }
+
+  .hub-core-card {
+    width: 140px;
+    height: 140px;
+    padding: 10px;
+  }
+
+  .hub-icon {
     font-size: 2rem;
+  }
+
+  .hub-taxonomy-name {
+    font-size: 1.15rem;
   }
 }

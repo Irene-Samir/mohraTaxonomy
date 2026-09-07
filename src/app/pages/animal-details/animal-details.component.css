@@ -86,17 +86,23 @@
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   margin-bottom: 1.25rem;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Left Hero Media Column */
 .hero-media-col {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .main-image-viewport {
   position: relative;
   width: 100%;
+  max-width: 100%;
   height: 290px;
   background-color: var(--soft-beige);
   border-radius: var(--radius-lg);
@@ -190,6 +196,16 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.75rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.hero-thumbnails-row::-webkit-scrollbar {
+  display: none;
 }
 
 .hero-thumb {
@@ -1278,14 +1294,16 @@
   .hero-section {
     grid-template-columns: 1fr;
     gap: 1.25rem;
+    padding: 1.25rem;
   }
 
   .main-image-viewport {
-    height: 260px;
+    height: 270px;
   }
 
   .main-content-layout {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
   .skeleton-hero,
@@ -1295,12 +1313,98 @@
 }
 
 @media (max-width: 640px) {
+  .animal-details-page {
+    padding: 0.75rem 0 2.5rem;
+  }
+
+  .details-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .breadcrumb-trail {
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    gap: 0.3rem;
+  }
+
+  .crumb-current {
+    max-width: 180px;
+  }
+
+  .hero-section {
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .main-image-viewport {
+    height: 230px;
+    border-radius: var(--radius-md);
+  }
+
+  .hero-thumb {
+    width: 48px;
+    height: 48px;
+  }
+
   .animal-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .scientific-binomial-row {
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .hero-top-bar {
+    flex-wrap: wrap;
+    gap: 0.4rem;
   }
 
   .facts-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .fact-card {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .card-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .tab-pill-group {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tab-pill-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+  }
+
+  .taxonomy-stepper {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .taxon-node-card {
+    padding: 0.25rem 0.55rem;
   }
 
   .lightbox-modal {
@@ -1310,5 +1414,23 @@
   .nav-arrow {
     width: 36px;
     height: 36px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-section {
+    padding: 0.75rem;
+  }
+
+  .main-image-viewport {
+    height: 195px;
+  }
+
+  .facts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .animal-title {
+    font-size: 1.35rem;
   }
 }

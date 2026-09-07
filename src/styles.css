@@ -77,10 +77,14 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
   background-color: var(--cream-bg);
   color: var(--text-primary);
   font-family: var(--font-sans);
