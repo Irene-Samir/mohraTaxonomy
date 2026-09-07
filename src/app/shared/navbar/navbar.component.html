@@ -1,0 +1,232 @@
+<nav class="navbar" [class.menu-open]="isMenuOpen()">
+  <div class="navbar-container container">
+    <!-- Brand Logo -->
+    <div class="navbar-brand">
+      <a routerLink="/" (click)="closeMenu(); closeUserDropdown()" class="logo-link">
+        <div class="brand-emblem">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 2C8.268 2 2 8.268 2 16C2 21.6 5.6 26.3 10.7 28.3C10.5 27 10.4 25.6 10.6 24.2C11.2 18.3 14.9 13.3 20.3 11C21.7 10.4 23.3 10.1 24.8 10.1C25.9 10.1 27 10.3 28 10.6C26.5 5.6 21.7 2 16 2Z" fill="#21593D"/>
+            <path d="M16 30C16.9 30 17.7 29.9 18.5 29.8C24.6 28.6 29.3 23.5 29.5 17.2C27.7 16.7 25.8 16.5 23.8 16.5C17.1 16.5 11.4 20.8 9.3 27C11.3 28.9 13.5 30 16 30Z" fill="#C48B36"/>
+            <circle cx="12" cy="11" r="2" fill="#FBF8F1"/>
+          </svg>
+        </div>
+        <div class="brand-text-wrapper">
+          <span class="brand-title">Mohra</span>
+          <span class="brand-subtitle">Taxonomy</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">
+          Home
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/animals" routerLinkActive="active" class="nav-link">
+          Animals
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/categories" routerLinkActive="active" class="nav-link">
+          Categories
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/about" routerLinkActive="active" class="nav-link">
+          About
+        </a>
+      </li>
+    </ul>
+
+    <!-- Search Bar -->
+    <form class="navbar-search" (submit)="onSearch($event)">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <input 
+          type="text" 
+          name="search"
+          [(ngModel)]="searchQuery" 
+          placeholder="Search species, classes..."
+          aria-label="Search animals"
+        />
+      </div>
+    </form>
+
+    <!-- Desktop Auth Actions -->
+    <div class="navbar-auth">
+      @if (!isAuthenticated()) {
+        <a routerLink="/login" class="btn btn-outline btn-sm">
+          Sign In
+        </a>
+        <a routerLink="/register" class="btn btn-primary btn-sm">
+          Register
+        </a>
+      } @else {
+        <!-- User Profile Dropdown -->
+        <div class="user-dropdown-container">
+          <button 
+            type="button" 
+            class="user-profile-button" 
+            (click)="toggleUserDropdown($event)"
+            [class.active]="isUserDropdownOpen()"
+            [attr.aria-expanded]="isUserDropdownOpen()"
+            aria-haspopup="true"
+            aria-label="User profile menu"
+          >
+            <div class="avatar-circle">
+              {{ (currentUser()?.fullName || currentUser()?.email || 'U').charAt(0).toUpperCase() }}
+            </div>
+            <span class="user-name">{{ currentUser()?.fullName || currentUser()?.email }}</span>
+            <span class="dropdown-caret" [class.open]="isUserDropdownOpen()">▾</span>
+          </button>
+
+          <!-- Dropdown Menu -->
+          @if (isUserDropdownOpen()) {
+            <div class="user-dropdown-menu" role="menu" (click)="$event.stopPropagation()">
+              <div class="dropdown-user-header">
+                <span class="dropdown-name">{{ currentUser()?.fullName || 'User' }}</span>
+                <span class="dropdown-email">{{ currentUser()?.email }}</span>
+                @if (isAdmin()) {
+                  <span class="badge-admin-pill">🛡️ Admin</span>
+                }
+              </div>
+              
+              <div class="dropdown-divider"></div>
+
+              <a 
+                routerLink="/dashboard" 
+                (click)="closeUserDropdown()" 
+                class="dropdown-item" 
+                role="menuitem"
+              >
+                <span class="item-icon">📊</span>
+                <span class="item-label">Dashboard</span>
+              </a>
+
+              @if (isAdmin()) {
+                <a 
+                  routerLink="/admin" 
+                  (click)="closeUserDropdown()" 
+                  class="dropdown-item admin-item" 
+                  role="menuitem"
+                >
+                  <span class="item-icon">🛠️</span>
+                  <span class="item-label">Admin Dashboard</span>
+                </a>
+              }
+
+              <div class="dropdown-divider"></div>
+
+              <button 
+                type="button" 
+                (click)="onLogout()" 
+                class="dropdown-item logout-item" 
+                role="menuitem"
+              >
+                <span class="item-icon">🚪</span>
+                <span class="item-label">Logout</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Mobile Hamburger Toggle -->
+    <button 
+      class="mobile-toggle" 
+      (click)="toggleMenu()" 
+      [class.active]="isMenuOpen()" 
+      aria-label="Toggle navigation menu"
+    >
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+      <span class="hamburger-bar"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Collapsible Menu -->
+  <div class="mobile-drawer" [class.open]="isMenuOpen()">
+    <div class="mobile-drawer-inner">
+      <form class="mobile-search" (submit)="onSearch($event)">
+        <div class="search-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input 
+            type="text" 
+            name="mobileSearch"
+            [(ngModel)]="searchQuery" 
+            placeholder="Search animals, categories..."
+          />
+        </div>
+      </form>
+
+      <ul class="mobile-nav-list">
+        <li>
+          <a routerLink="/" (click)="closeMenu()" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            <span class="nav-icon">🌿</span> Home
+          </a>
+        </li>
+        <li>
+          <a routerLink="/animals" (click)="closeMenu()" routerLinkActive="active">
+            <span class="nav-icon">🦁</span> Animals
+          </a>
+        </li>
+        <li>
+          <a routerLink="/categories" (click)="closeMenu()" routerLinkActive="active">
+            <span class="nav-icon">🗂️</span> Categories
+          </a>
+        </li>
+        <li>
+          <a routerLink="/about" (click)="closeMenu()" routerLinkActive="active">
+            <span class="nav-icon">📖</span> About
+          </a>
+        </li>
+      </ul>
+
+      <div class="mobile-auth-section">
+        @if (!isAuthenticated()) {
+          <a routerLink="/login" (click)="closeMenu()" class="btn btn-secondary btn-block">
+            Sign In
+          </a>
+          <a routerLink="/register" (click)="closeMenu()" class="btn btn-primary btn-block">
+            Create Account
+          </a>
+        } @else {
+          <div class="mobile-user-card">
+            <div class="avatar-circle">
+              {{ (currentUser()?.fullName || currentUser()?.email || 'U').charAt(0).toUpperCase() }}
+            </div>
+            <div class="mobile-user-details">
+              <div class="mobile-user-name">{{ currentUser()?.fullName || 'User' }}</div>
+              <div class="mobile-user-email">{{ currentUser()?.email }}</div>
+              @if (isAdmin()) {
+                <span class="badge-admin-pill">🛡️ Admin</span>
+              }
+            </div>
+          </div>
+
+          <div class="mobile-user-links">
+            <a routerLink="/dashboard" (click)="closeMenu()" class="mobile-menu-link">
+              <span class="nav-icon">📊</span> Dashboard
+            </a>
+            @if (isAdmin()) {
+              <a routerLink="/admin" (click)="closeMenu()" class="mobile-menu-link mobile-admin-link">
+                <span class="nav-icon">🛠️</span> Admin Dashboard
+              </a>
+            }
+            <button type="button" (click)="onLogout()" class="mobile-logout-btn">
+              <span class="nav-icon">🚪</span> Logout
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</nav>

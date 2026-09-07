@@ -1,0 +1,428 @@
+<!-- ================= HERO SECTION (PRESERVED VERBATIM) ================= -->
+<section class="hero-section">
+  <div class="hero-background-shapes">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-grid"></div>
+  </div>
+
+  <div class="container hero-container">
+    <!-- Hero Left: Text & Search Content -->
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        <span class="badge-text">Interactive Zoological Encyclopedia</span>
+      </div>
+
+      <h1 class="hero-title">
+        Discover the Wonders of
+        <span class="highlight-text">Animal Kingdom</span>
+        with Mohra
+      </h1>
+
+      <p class="hero-subtitle">
+        Explore detailed profiles of wildlife from around the globe. Learn about habitats,
+        diets, biological classifications, and conservation statuses in one unified scientific platform.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/animals" class="btn btn-primary btn-lg">
+          <span>Start Exploring</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a routerLink="/categories" class="btn btn-secondary btn-lg">
+          Browse Categories
+        </a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-number">
+            @if (isAnimalCountLoading()) {
+              —
+            } @else if (animalCount() !== null) {
+              {{ animalCount() }}
+            } @else {
+              —
+            }
+          </span>
+          <span class="stat-label">Animals</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">
+            @if (isCategoryCountLoading()) {
+              —
+            } @else if (categoryCount() !== null) {
+              {{ categoryCount() }}
+            } @else {
+              —
+            }
+          </span>
+          <span class="stat-label">Categories</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-number">100%</span>
+          <span class="stat-label">Scientific Accuracy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Right: Visual Composition -->
+    <div class="hero-visual">
+      <div class="hero-visual-wrapper">
+        <div class="visual-organic-backdrop"></div>
+        <div class="visual-card-primary">
+          <img 
+            src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=900&q=80" 
+            alt="Majestic African Lion" 
+            class="hero-main-img"
+          />
+          <div class="visual-gradient-overlay"></div>
+          
+          <!-- Floating Specimen Tag -->
+          <div class="specimen-tag">
+            <div class="specimen-icon">🦁</div>
+            <div class="specimen-info">
+              <span class="specimen-common">African Lion</span>
+              <span class="specimen-scientific">Panthera leo • Mammalia</span>
+            </div>
+            <span class="status-pill">Vulnerable</span>
+          </div>
+        </div>
+
+        <!-- Secondary Floating Visual Card -->
+        <div class="floating-badge-card">
+          <div class="badge-icon-wrap">🦅</div>
+          <div class="badge-text-wrap">
+            <span class="badge-title">Kingdom Animalia</span>
+            <span class="badge-sub">Biodiversity Portal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANIMATED TAXONOMY EXPLORER ================= -->
+<section class="section taxonomy-explorer-section" id="taxonomy-explorer">
+  <div class="container">
+    
+    <!-- Section Header (English Only) -->
+    <div class="section-header">
+      <div class="section-badge">
+        <span class="badge-icon">🔬</span>
+        <span>Biological Classification</span>
+      </div>
+      <h2 class="section-title">EXPLORE THE TAXONOMY</h2>
+      <p class="section-subtitle">
+        Journey from the Animal Kingdom to individual species.
+      </p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="explorer-loading-state">
+        <div class="spinner-ring"></div>
+        <span class="loading-label">Loading taxonomy hierarchy...</span>
+      </div>
+    }
+
+    <!-- Loaded State: Interactive Explorer Canvas -->
+    @if (!isLoading() && currentNode()) {
+      <div class="explorer-main-container">
+        
+        <!-- Navigation & Breadcrumb Header Bar -->
+        <div class="explorer-nav-bar">
+          
+          <!-- Back Button (Prominent at top-left whenever deeper than root) -->
+          <div class="nav-left-action">
+            @if (currentPath().length > 1) {
+              <button 
+                type="button" 
+                class="nav-back-btn"
+                (click)="zoomBack()"
+                [disabled]="zoomState() !== 'idle'"
+                aria-label="Back to previous classification"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Back</span>
+              </button>
+            } @else {
+              <div class="nav-root-badge">
+                <span class="root-dot"></span>
+                <span>Kingdom Animalia (Root)</span>
+              </div>
+            }
+          </div>
+
+          <!-- Clickable Interactive Breadcrumb Path -->
+          <nav class="nav-breadcrumbs-scroll" aria-label="Taxonomy Breadcrumbs">
+            <div class="nav-breadcrumbs-list">
+              @for (crumb of currentPath(); track crumb.id; let idx = $index; let isLast = $last) {
+                <div class="breadcrumb-item" [class.is-active]="isLast">
+                  <button 
+                    type="button" 
+                    class="crumb-btn" 
+                    [disabled]="isLast || zoomState() !== 'idle'"
+                    (click)="jumpToBreadcrumb(idx)"
+                    [title]="'Return to ' + crumb.name"
+                  >
+                    <span class="crumb-icon">{{ getNodeIcon(crumb.name, crumb.rank) }}</span>
+                    <span class="crumb-name">{{ crumb.name }}</span>
+                    <span class="crumb-rank-tag">{{ crumb.rank }}</span>
+                  </button>
+                  @if (!isLast) {
+                    <span class="crumb-separator">›</span>
+                  }
+                </div>
+              }
+            </div>
+          </nav>
+
+          <!-- Current Depth / Rank Pill -->
+          <div class="nav-rank-indicator">
+            <span class="indicator-label">Level</span>
+            <span class="indicator-value">{{ currentNode()?.rank }}</span>
+          </div>
+
+        </div>
+
+        <!-- 2-Column Explorer Stage Grid -->
+        <div class="explorer-stage-grid">
+          
+          <!-- Column 1: Clean, Focused Animated Visualization Canvas -->
+          <div class="explorer-viewport-col">
+            <div 
+              class="explorer-zoom-stage"
+              [class.is-zooming-in]="zoomState() === 'zooming-in'"
+              [class.is-zooming-out]="zoomState() === 'zooming-out'"
+            >
+              
+              <!-- SVG Organic Radiating Connection Lines -->
+              <svg class="explorer-svg-canvas" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <defs>
+                  <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                    <feMerge>
+                      <feMergeNode in="blur"/>
+                      <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                <!-- Dynamic connecting curves from Center Hub (500, 300) to each Orbiting Child -->
+                @for (child of childNodes(); track child.id; let idx = $index) {
+                  <path 
+                    [attr.d]="getChildSvgPath(idx, childNodes().length)" 
+                    class="explorer-branch-curve"
+                    [class.curve-hovered]="hoveredChildNode()?.id === child.id"
+                  />
+                }
+              </svg>
+
+              <!-- Central Selected Taxonomy Node (Large, Visually Dominant, Highly Legible) -->
+              <div class="central-active-hub">
+                <div class="hub-pulse-ring ring-outer"></div>
+                <div class="hub-pulse-ring ring-inner"></div>
+
+                <div class="hub-core-card">
+                  <div class="hub-icon">{{ getNodeIcon(currentNode()!.name, currentNode()!.rank) }}</div>
+                  <span class="hub-rank-badge">{{ currentNode()!.rank }}</span>
+                  <h3 class="hub-taxonomy-name">{{ currentNode()!.name }}</h3>
+
+                  @if (childNodes().length > 0) {
+                    <span class="hub-children-count">{{ childNodes().length }} Sub-Taxa</span>
+                  } @else {
+                    <span class="hub-terminal-badge">Terminal Taxon</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Orbiting Child Taxonomy Nodes (Medium/Large, Highly Legible, No Tiny Text) -->
+              <div class="orbiting-children-cluster">
+                @for (child of childNodes(); track child.id; let idx = $index) {
+                  <div 
+                    class="orbiting-child-node"
+                    [style.--node-angle]="getChildAngle(idx, childNodes().length) + 'deg'"
+                    [style.--node-dist]="getChildDistance(childNodes().length) + 'px'"
+                    [class.child-is-hovered]="hoveredChildNode()?.id === child.id"
+                    (mouseenter)="setHoveredChild(child)"
+                    (mouseleave)="setHoveredChild(null)"
+                    (click)="zoomIntoNode(child)"
+                    role="button"
+                    tabindex="0"
+                    [attr.aria-label]="'Zoom into ' + child.name"
+                  >
+                    <div class="child-bubble-icon">
+                      <span>{{ getNodeIcon(child.name, child.rank) }}</span>
+                    </div>
+                    <div class="child-bubble-content">
+                      <h4 class="child-name">{{ child.name }}</h4>
+                      <div class="child-meta-row">
+                        <span class="child-rank">{{ child.rank }}</span>
+                        @if (child.children && child.children.length > 0) {
+                          <span class="child-count">({{ child.children.length }})</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                <!-- Notice if a leaf taxon is reached -->
+                @if (childNodes().length === 0) {
+                  <div class="terminal-leaf-notice">
+                    <span class="leaf-icon">🌿</span>
+                    <p class="leaf-text">
+                      You have reached the deepest recorded rank for <strong>{{ currentNode()!.name }}</strong>.
+                    </p>
+                    <a 
+                      [routerLink]="['/animals']" 
+                      [queryParams]="{ search: currentNode()!.name }" 
+                      class="btn btn-primary btn-md"
+                    >
+                      Explore Species in Catalog
+                    </a>
+                  </div>
+                }
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Column 2: Enhanced Floating Information Panel (English Only, Clear Spacing & Hierarchy) -->
+          <div class="explorer-panel-col">
+            <div class="floating-glass-card">
+              
+              <!-- Panel Header -->
+              <div class="panel-header-block">
+                <div class="panel-rank-chip">
+                  <span>{{ activeDisplayNode()?.rank }}</span>
+                </div>
+
+                <div class="panel-title-row">
+                  <span class="panel-icon-large">{{ getNodeIcon(activeDisplayNode()!.name, activeDisplayNode()!.rank) }}</span>
+                  <div class="panel-title-info">
+                    <h3 class="panel-taxon-name">{{ activeDisplayNode()?.name }}</h3>
+                    <span class="panel-rank-subtitle">Rank: {{ activeDisplayNode()?.rank }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Short Biological Definition -->
+              <div class="panel-section-box">
+                <h4 class="section-box-title">Definition</h4>
+                <p class="definition-text">
+                  {{ getNodeDefinition(activeDisplayNode()!.name, activeDisplayNode()!.rank) }}
+                </p>
+              </div>
+
+              <!-- Taxonomic Path -->
+              <div class="panel-section-box">
+                <h4 class="section-box-title">Taxonomic Path</h4>
+                <div class="taxonomic-path-list">
+                  @for (crumb of displayLineage(); track crumb.name; let isLast = $last) {
+                    <div class="path-item-row" [class.is-current]="isLast">
+                      <span class="path-item-icon">{{ crumb.icon }}</span>
+                      <div class="path-item-text">
+                        <span class="path-item-rank">{{ crumb.rank }}</span>
+                        <strong class="path-item-name">{{ crumb.name }}</strong>
+                      </div>
+                      @if (isLast) {
+                        <span class="path-current-tag">Selected</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Panel Action Buttons -->
+              <div class="panel-actions-wrap">
+                <a 
+                  [routerLink]="['/animals']" 
+                  [queryParams]="{ search: activeDisplayNode()?.name }" 
+                  class="btn btn-primary btn-md btn-full"
+                >
+                  <span>Explore Animals in {{ activeDisplayNode()?.name }}</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </a>
+
+                @if (hoveredChildNode()) {
+                  <button 
+                    type="button" 
+                    class="btn btn-secondary btn-md btn-full"
+                    (click)="zoomIntoNode(hoveredChildNode()!)"
+                  >
+                    <span>Zoom into {{ hoveredChildNode()?.name }} ›</span>
+                  </button>
+                }
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    }
+
+  </div>
+</section>
+
+<!-- ================= WHY MOHRA TAXONOMY ================= -->
+<section class="section why-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-badge">Platform Pillars</div>
+      <h2 class="section-title">Why Mohra Taxonomy?</h2>
+      <p class="section-subtitle">
+        A state-of-the-art educational framework engineered for students, researchers, and nature enthusiasts.
+      </p>
+    </div>
+
+    <div class="why-grid">
+      @for (feature of features; track feature.title) {
+        <div class="why-card">
+          <div class="why-icon-box">
+            <span class="why-icon">{{ feature.icon }}</span>
+          </div>
+          <div class="why-badge">{{ feature.badge }}</div>
+          <h3 class="why-title">{{ feature.title }}</h3>
+          <p class="why-desc">{{ feature.description }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA SECTION ================= -->
+<section class="cta-section">
+  <div class="cta-backdrop-shape"></div>
+  <div class="container cta-container">
+    <div class="cta-content">
+      <span class="cta-pill">Begin Your Journey</span>
+      <h2 class="cta-heading">Start Exploring the Animal Kingdom</h2>
+      <p class="cta-text">
+        Discover the fascinating world of animals, understand their classification, and contribute to global biodiversity appreciation.
+      </p>
+      <div class="cta-buttons">
+        <a routerLink="/animals" class="btn btn-cumin btn-lg">
+          Explore Animals
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a routerLink="/register" class="btn btn-outline-light btn-lg">
+          Create Free Account
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,130 @@
+<div class="about-page">
+  <!-- 1. HERO SECTION -->
+  <section class="about-hero">
+    <div class="container hero-layout">
+      <div class="hero-text-content">
+        <span class="hero-badge">🌿 Educational Biodiversity Platform</span>
+        <h1 class="hero-title">About Mohra Taxonomy</h1>
+        <p class="hero-subtitle">
+          Explore the fascinating diversity of the animal kingdom through an interactive, visual biological classification system.
+        </p>
+        <div class="hero-btn-row">
+          <a routerLink="/animals" class="btn btn-primary">Browse Animals</a>
+          <a routerLink="/categories" class="btn btn-outline">Explore Taxonomy</a>
+        </div>
+      </div>
+
+      <div class="hero-image-wrapper">
+        <div class="hero-image-card">
+          <img 
+            src="https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=1000&q=80" 
+            alt="Wildlife Biodiversity - Mohra Taxonomy" 
+            class="hero-wildlife-img"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container about-main-content">
+    <!-- 2. ABOUT THE PROJECT -->
+    <section class="about-card card">
+      <div class="section-header">
+        <span class="section-tag">Overview</span>
+        <h2 class="section-title">About the Project</h2>
+      </div>
+      <div class="section-body">
+        <p class="lead-text">
+          <strong>Mohra Taxonomy</strong> is an educational platform that helps users explore animals and understand their biological taxonomy in a simple and interactive way.
+        </p>
+        <p class="body-text">
+          Users can explore animals, browse categories, search for information, save favorites, and interact with an AI assistant.
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. PROJECT IDEA & RESEARCH -->
+    <section class="about-card card">
+      <div class="section-header">
+        <span class="section-tag">Origins & Roles</span>
+        <h2 class="section-title">Project Idea & Research</h2>
+      </div>
+      <div class="section-body">
+        <div class="idea-highlight-box">
+          <p class="idea-text">
+            The project idea and scientific research were done by <strong>Mhraeil Samir</strong>, while the full-stack development and implementation were done by <strong>Ereny Samir</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. TEAM -->
+    <section class="about-card card">
+      <div class="section-header">
+        <span class="section-tag">Leadership</span>
+        <h2 class="section-title">Team</h2>
+      </div>
+      
+      <div class="team-grid">
+        @for (member of team; track member.name) {
+          <div class="team-card">
+            <div class="team-image-container">
+              <img 
+                [src]="member.image" 
+                [alt]="member.name" 
+                class="team-member-photo" 
+                loading="lazy"
+              />
+            </div>
+            <div class="team-info">
+              <h3 class="team-name">{{ member.name }}</h3>
+              <span class="team-role">{{ member.role }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 5. DATA SOURCES -->
+    <section class="about-card card">
+      <div class="section-header">
+        <span class="section-tag">References</span>
+        <h2 class="section-title">Data Sources</h2>
+      </div>
+      
+      <div class="sources-list">
+        @for (source of dataSources; track source.name) {
+          <div class="source-row">
+            <div class="source-main">
+              <h3 class="source-title">{{ source.name }}</h3>
+              <p class="source-desc">{{ source.description }}</p>
+            </div>
+            <a [href]="source.url" target="_blank" rel="noopener noreferrer" class="source-link">
+              <span>Visit Official Site</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+              </svg>
+            </a>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 6. TECHNOLOGIES USED -->
+    <section class="about-card card">
+      <div class="section-header">
+        <span class="section-tag">Stack</span>
+        <h2 class="section-title">Technologies Used</h2>
+      </div>
+
+      <div class="tech-badges-wrap">
+        @for (tech of technologies; track tech) {
+          <span class="tech-badge">
+            {{ tech }}
+          </span>
+        }
+      </div>
+    </section>
+  </main>
+</div>

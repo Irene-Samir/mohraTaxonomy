@@ -1,0 +1,743 @@
+/* ================= CATEGORIES & TAXONOMY TREE PAGE ================= */
+.categories-page {
+  background-color: var(--cream-bg);
+  min-height: calc(100vh - 72px);
+  padding-bottom: var(--spacing-3xl);
+}
+
+/* Page Header */
+.page-header {
+  background: linear-gradient(180deg, var(--white) 0%, var(--cream-bg) 100%);
+  padding: var(--spacing-2xl) 0 var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-content {
+  max-width: 860px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.page-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: var(--dark-green-heading);
+  margin: 0.75rem 0 0.5rem;
+  letter-spacing: -0.03em;
+}
+
+.page-description {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Controls Bar */
+.tree-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.search-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 420px;
+  max-width: 580px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.15rem;
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.85rem 2.8rem 0.85rem 3.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background-color: var(--white);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.search-input:focus {
+  border-color: var(--main-green);
+  box-shadow: 0 0 0 4px rgba(33, 89, 61, 0.12);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-search-btn:hover {
+  color: var(--text-primary);
+}
+
+.tree-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Stats Pills */
+.stats-pills-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-xs);
+}
+
+.stat-pill-label {
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stat-pill-val {
+  font-weight: 700;
+  color: var(--dark-green-heading);
+}
+
+.search-active-pill {
+  background-color: var(--warm-cumin-light);
+  border-color: var(--warm-cumin-border);
+}
+
+.search-active-pill .stat-pill-val {
+  color: var(--warm-cumin-hover);
+}
+
+.pill-clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--danger-red);
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 0.25rem;
+  padding: 0 0.2rem;
+  font-size: 0.85rem;
+}
+
+/* Main Container */
+.main-categories-container {
+  padding-top: var(--spacing-2xl);
+  max-width: 1060px;
+}
+
+/* ================= SEARCH RESULTS SECTION ================= */
+.search-results-section {
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-xl);
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+}
+
+.search-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--soft-beige);
+}
+
+.search-results-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--dark-green-heading);
+  margin-bottom: 0.25rem;
+}
+
+.highlight-term {
+  color: var(--warm-cumin);
+}
+
+.search-results-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.search-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--cream-bg);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-result-row:hover {
+  background-color: var(--white);
+  border-color: var(--main-green);
+  box-shadow: var(--shadow-sm);
+  transform: translateX(3px);
+}
+
+.search-result-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.search-result-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.search-result-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--dark-green-heading);
+}
+
+.sub-taxa-pill {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--soft-beige);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.search-result-path {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.path-icon {
+  color: var(--warm-cumin);
+  font-weight: bold;
+}
+
+.path-text {
+  word-break: break-word;
+}
+
+.search-result-action {
+  flex-shrink: 0;
+}
+
+.view-animals-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.no-search-results {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.empty-search-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ================= INTERACTIVE TAXONOMY TREE ================= */
+.taxonomy-tree-card {
+  padding: var(--spacing-xl);
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.tree-rank-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--soft-beige);
+}
+
+.legend-title {
+  font-size: 0.825rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.legend-pills {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tree-root-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Recursive Tree Nodes */
+.tree-node-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 1rem;
+  background-color: var(--white);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  user-select: none;
+}
+
+.node-card.has-children {
+  cursor: pointer;
+}
+
+.node-card:hover {
+  background-color: var(--cream-bg);
+  border-color: var(--warm-cumin-border);
+  box-shadow: var(--shadow-xs);
+  transform: translateX(2px);
+}
+
+.node-card:focus-visible {
+  outline: 2px solid var(--main-green);
+  outline-offset: 1px;
+}
+
+/* Root level distinction */
+.tree-node-wrapper[style*="--node-depth:0"] > .node-card {
+  background-color: #F8FAF8;
+  border-color: #C8D8CE;
+  padding: 0.85rem 1.15rem;
+  border-left: 4px solid var(--main-green);
+}
+
+.tree-node-wrapper[style*="--node-depth:0"] > .node-card:hover {
+  background-color: #EEF4F0;
+  border-color: var(--main-green);
+}
+
+.tree-node-wrapper[style*="--node-depth:0"] .taxon-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--dark-green-heading);
+}
+
+.node-indicator-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--soft-beige);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--dark-green-heading);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+  background: var(--main-green);
+  border-color: var(--main-green);
+  color: var(--white);
+  transform: scale(1.06);
+}
+
+.chevron-icon {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: rotate(-90deg);
+}
+
+.toggle-btn.expanded .chevron-icon {
+  transform: rotate(0deg);
+}
+
+.leaf-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.leaf-bullet {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--warm-cumin);
+}
+
+.node-rank-slot {
+  flex-shrink: 0;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.22rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+}
+
+.rank-icon {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.rank-kingdom { background-color: var(--primary-dark-green); color: var(--white); }
+.rank-phylum { background-color: var(--emerald-green); color: var(--white); }
+.rank-class { background-color: var(--warm-cumin); color: var(--white); }
+.rank-order { background-color: #2F6B56; color: var(--white); }
+.rank-family { background-color: #A06D28; color: var(--white); }
+.rank-genus { background-color: #4A7A5D; color: var(--white); }
+.rank-species { background-color: #6C5B4C; color: var(--white); }
+.rank-default { background-color: var(--soft-beige); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+.node-info-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.taxon-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.children-count-pill {
+  font-size: 0.725rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: var(--soft-beige);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.node-action-slot {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.category-fav-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-right: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.category-fav-toggle-btn:hover {
+  background-color: var(--warm-cumin-light);
+  border-color: var(--warm-cumin-border);
+  color: var(--warm-cumin);
+  transform: scale(1.08);
+}
+
+.category-fav-toggle-btn.active {
+  background-color: var(--warm-cumin-light);
+  border-color: var(--warm-cumin);
+  color: var(--warm-cumin);
+}
+
+.view-animals-node-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.825rem;
+  gap: 0.35rem;
+  border-radius: var(--radius-md);
+  border-color: #C8D8CE;
+  background-color: var(--white);
+  color: var(--main-green);
+}
+
+.view-animals-node-btn:hover {
+  background-color: var(--main-green);
+  border-color: var(--main-green);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.arrow-icon {
+  transition: transform 0.2s ease;
+}
+
+.view-animals-node-btn:hover .arrow-icon {
+  transform: translateX(3px);
+}
+
+/* Branch lines */
+.tree-children-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  margin-left: 1.35rem;
+  padding-left: 1.25rem;
+  border-left: 2px solid #DCE7DF;
+  position: relative;
+}
+
+.tree-children-container > .tree-node-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 1.35rem;
+  left: -1.25rem;
+  width: 1.15rem;
+  height: 2px;
+  background-color: #DCE7DF;
+}
+
+/* Skeletons & States */
+.tree-skeleton-wrapper {
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.loading-mini-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--dark-green-heading);
+  margin-bottom: var(--spacing-sm);
+}
+
+.skeleton-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-tree-item.child-1 {
+  margin-left: 1.5rem;
+  border-left: 2px solid #EFECE6;
+}
+
+.skeleton-toggle {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #EFECE6 25%, #F7F5F0 50%, #EFECE6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-badge {
+  width: 70px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, #EFECE6 25%, #F7F5F0 50%, #EFECE6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-title {
+  width: 160px;
+  height: 20px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #EFECE6 25%, #F7F5F0 50%, #EFECE6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-btn {
+  margin-left: auto;
+  width: 100px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, #EFECE6 25%, #F7F5F0 50%, #EFECE6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.error-state-card {
+  text-align: center;
+  padding: var(--spacing-2xl);
+  margin: var(--spacing-lg) auto;
+  max-width: 540px;
+}
+
+.error-icon-box {
+  font-size: 2.75rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.error-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--dark-green-heading);
+  margin-bottom: 0.35rem;
+}
+
+.error-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 2.15rem;
+  }
+
+  .tree-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-input-group {
+    max-width: 100%;
+  }
+
+  .tree-actions-row {
+    justify-content: center;
+  }
+
+  .taxonomy-tree-card {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-xl);
+  }
+
+  .node-card {
+    padding: 0.6rem 0.75rem;
+    gap: 0.45rem;
+  }
+
+  .search-result-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-result-action {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .taxon-name {
+    font-size: 0.925rem;
+  }
+
+  .rank-badge {
+    padding: 0.18rem 0.5rem;
+    font-size: 0.65rem;
+  }
+
+  .view-animals-node-btn span {
+    display: none;
+  }
+
+  .view-animals-node-btn {
+    padding: 0.35rem;
+  }
+}

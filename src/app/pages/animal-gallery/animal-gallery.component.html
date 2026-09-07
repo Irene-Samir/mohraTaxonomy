@@ -1,0 +1,157 @@
+<div class="gallery-page">
+  <div class="container">
+    <!-- Breadcrumb & Back Navigation -->
+    <nav class="gallery-nav" aria-label="Breadcrumb">
+      <a [routerLink]="['/animals', animalId()]" class="back-link">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Back to Animal</span>
+      </a>
+
+      <div class="breadcrumb-trail">
+        <a routerLink="/">Home</a>
+        <span class="crumb-sep">/</span>
+        <a routerLink="/animals">Animals</a>
+        <span class="crumb-sep">/</span>
+        <a [routerLink]="['/animals', animalId()]">{{ animal()?.name || 'Animal' }}</a>
+        <span class="crumb-sep">/</span>
+        <span class="crumb-current">Image Gallery</span>
+      </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="gallery-header">
+      <div class="badge badge-cumin">Visual Archive</div>
+      <h1 class="gallery-title">
+        {{ animal()?.name || 'Specimen' }} — Photo Gallery
+      </h1>
+      @if (animal()?.scientificName) {
+        <p class="gallery-scientific">
+          <em>{{ animal()?.scientificName }}</em>
+        </p>
+      }
+      <p class="gallery-subtitle">
+        Viewing all {{ images().length }} curated photographic records, anatomical illustrations, and specimen snapshots on file.
+      </p>
+    </header>
+
+    <!-- Error State -->
+    @if (errorMessage()) {
+      <div class="error-state-card card">
+        <div class="error-icon-box">⚠️</div>
+        <h2 class="error-title">Unable to load animal images</h2>
+        <p class="error-desc">{{ errorMessage() }}</p>
+        <button class="btn btn-primary" (click)="loadGallery(animalId()!)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Retry Loading
+        </button>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (isLoading()) {
+      <div class="gallery-grid">
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div class="gallery-item-skeleton"></div>
+        }
+      </div>
+    }
+
+    <!-- Gallery Grid of ALL Images -->
+    @if (!isLoading() && !errorMessage()) {
+      @if (images().length === 0) {
+        <div class="empty-state-card card">
+          <div class="empty-icon-box">📷</div>
+          <h2 class="empty-title">No images available</h2>
+          <p class="empty-desc">
+            There are currently no additional photographic records uploaded for this animal specimen.
+          </p>
+          <a [routerLink]="['/animals', animalId()]" class="btn btn-primary">
+            Return to Animal Details
+          </a>
+        </div>
+      } @else {
+        <div class="gallery-grid">
+          @for (img of images(); track img.id; let i = $index) {
+            <div 
+              class="gallery-card"
+              (click)="openLightbox(i)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Open image ' + (i + 1) + ' in preview'"
+            >
+              <div class="gallery-img-wrapper">
+                <img 
+                  [src]="img.imageUrl" 
+                  [alt]="img.description || (animal()?.name + ' photo ' + (i + 1))" 
+                  class="gallery-img"
+                  loading="lazy"
+                />
+                
+                <div class="gallery-overlay">
+                  <span class="zoom-icon">🔍 View High-Res</span>
+                </div>
+
+                <span class="photo-index-tag">#{{ i + 1 }}</span>
+                @if (img.type) {
+                  <span class="photo-type-tag">{{ img.type }}</span>
+                }
+              </div>
+
+              @if (img.description) {
+                <div class="gallery-card-caption">
+                  <p class="caption-text">{{ img.description }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Lightbox Modal Preview -->
+  @if (selectedImageIndex() !== null && images()[selectedImageIndex()!]; as activeImg) {
+    <div class="lightbox-backdrop" (click)="closeLightbox()" role="dialog" aria-modal="true">
+      <div class="lightbox-modal" (click)="$event.stopPropagation()">
+        <!-- Close Button -->
+        <button class="lightbox-close-btn" (click)="closeLightbox()" aria-label="Close preview">
+          ✕
+        </button>
+
+        <!-- Navigation Buttons -->
+        @if (images().length > 1) {
+          <button class="lightbox-nav-btn prev" (click)="prevImage($event)" aria-label="Previous image">
+            ‹
+          </button>
+          <button class="lightbox-nav-btn next" (click)="nextImage($event)" aria-label="Next image">
+            ›
+          </button>
+        }
+
+        <!-- Main Lightbox Image -->
+        <div class="lightbox-image-container">
+          <img [src]="activeImg.imageUrl" [alt]="activeImg.description || 'Animal Image'" class="lightbox-full-img" />
+        </div>
+
+        <!-- Lightbox Caption & Counter -->
+        <div class="lightbox-footer">
+          <div class="lightbox-info">
+            <span class="lightbox-counter">Photo {{ selectedImageIndex()! + 1 }} of {{ images().length }}</span>
+            @if (activeImg.description) {
+              <p class="lightbox-caption">{{ activeImg.description }}</p>
+            }
+          </div>
+          @if (activeImg.type) {
+            <span class="badge badge-sage">{{ activeImg.type }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

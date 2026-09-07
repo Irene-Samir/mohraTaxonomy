@@ -1,0 +1,230 @@
+<div class="chat-page">
+  <div class="chat-container">
+    
+    <!-- Mobile Sidebar Backdrop -->
+    @if (sidebarOpen()) {
+      <div class="sidebar-backdrop" (click)="toggleSidebar()"></div>
+    }
+
+    <!-- ================= LEFT SIDEBAR ================= -->
+    <aside class="chat-sidebar" [class.open]="sidebarOpen()">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <span class="brand-ai-icon">🤖</span>
+          <span class="brand-ai-title">Mohra AI</span>
+        </div>
+        <button class="btn btn-primary new-chat-btn" (click)="createNewChat()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>New Chat</span>
+        </button>
+      </div>
+
+      <!-- Sessions List -->
+      <div class="sessions-scroll">
+        <div class="sessions-label">Recent Conversations</div>
+
+        @if (isLoadingSessions()) {
+          <div class="sessions-loading">
+            <div class="skeleton-session-line"></div>
+            <div class="skeleton-session-line"></div>
+            <div class="skeleton-session-line"></div>
+          </div>
+        }
+
+        @if (!isLoadingSessions() && sessions().length === 0) {
+          <div class="empty-sessions">
+            <span class="empty-sessions-icon">💬</span>
+            <p>No chat history yet.</p>
+          </div>
+        }
+
+        @if (!isLoadingSessions() && sessions().length > 0) {
+          <ul class="sessions-list">
+            @for (s of sessions(); track s.id) {
+              <li 
+                class="session-item"
+                [class.active]="activeSessionId() === s.id"
+                (click)="selectSession(s.id)"
+              >
+                <div class="session-item-main">
+                  <span class="session-icon">💬</span>
+                  <span class="session-title" [title]="s.title">{{ s.title || 'Biological Research Chat' }}</span>
+                </div>
+                <button 
+                  class="session-delete-btn" 
+                  (click)="deleteSession(s.id, $event)"
+                  title="Delete chat session"
+                >
+                  ✕
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <a routerLink="/dashboard" class="back-dashboard-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ================= RIGHT CONVERSATION PANE ================= -->
+    <main class="chat-main">
+      <!-- Chat Pane Header -->
+      <header class="chat-pane-header">
+        <div class="chat-header-left">
+          <button class="mobile-sidebar-toggle" (click)="toggleSidebar()" title="Toggle chat history sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12h18M3 6h18M3 18h18"/>
+            </svg>
+          </button>
+          <div class="header-session-info">
+            <h2 class="active-session-title">
+              {{ activeSession()?.title || 'Taxonomy Research Assistant' }}
+            </h2>
+            <span class="ai-status-indicator">
+              <span class="status-dot"></span> Active
+            </span>
+          </div>
+        </div>
+
+        @if (messages().length > 0) {
+          <button 
+            class="btn btn-outline btn-sm clear-conversation-btn" 
+            (click)="clearCurrentChat()"
+            title="Clear all messages in this conversation"
+          >
+            Clear Messages
+          </button>
+        }
+      </header>
+
+      <!-- Messages Stream Scroll Area -->
+      <div class="messages-stream" #messagesScroll>
+        
+        <!-- Error Banner if any -->
+        @if (errorMessage()) {
+          <div class="chat-error-banner">
+            <span>⚠️ {{ errorMessage() }}</span>
+            <button (click)="errorMessage.set(null)" class="error-close-btn">✕</button>
+          </div>
+        }
+
+        <!-- Welcome Empty State -->
+        @if (messages().length === 0 && !isLoadingMessages()) {
+          <div class="chat-welcome-state">
+            <div class="welcome-emblem">🤖</div>
+            <h3 class="welcome-heading">Hello! I'm Mohra AI.</h3>
+            <p class="welcome-text">
+              Ask me about animal taxonomy, biological classifications, habitats, ecological roles, and evolutionary phylogenetic relationships.
+            </p>
+
+            <div class="suggestions-grid">
+              <div class="suggestions-label">Try asking:</div>
+              @for (prompt of promptSuggestions; track prompt) {
+                <button class="suggestion-chip" (click)="sendSuggestion(prompt)">
+                  <span class="chip-arrow">↳</span> {{ prompt }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Loading Messages Skeleton -->
+        @if (isLoadingMessages()) {
+          <div class="messages-loading">
+            <div class="skeleton-bubble user"></div>
+            <div class="skeleton-bubble ai"></div>
+          </div>
+        }
+
+        <!-- Messages List -->
+        @if (!isLoadingMessages()) {
+          <div class="messages-list">
+            @for (msg of messages(); track msg.id) {
+              <!-- User Question Bubble -->
+              <div class="message-row user-row">
+                <div class="message-bubble user-bubble">
+                  <p class="message-text">{{ msg.question }}</p>
+                  <span class="message-time">{{ formatTime(msg.createdAt) }}</span>
+                </div>
+                <div class="message-avatar user-avatar">
+                  {{ (currentUser()?.fullName || currentUser()?.email || 'U').charAt(0).toUpperCase() }}
+                </div>
+              </div>
+
+              <!-- AI Answer Bubble -->
+              <div class="message-row ai-row">
+                <div class="message-avatar ai-avatar">
+                  🤖
+                </div>
+                <div class="message-bubble ai-bubble">
+                  <div class="ai-bubble-header">
+                    <span class="ai-speaker-name">Mohra AI</span>
+                    <span class="message-time">{{ formatTime(msg.createdAt) }}</span>
+                  </div>
+                  <div class="message-text ai-markdown-text">
+                    {{ msg.answer }}
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Sending / Thinking Indicator -->
+            @if (isSendingMessage()) {
+              <div class="message-row ai-row typing-row">
+                <div class="message-avatar ai-avatar">
+                  🤖
+                </div>
+                <div class="message-bubble ai-bubble typing-bubble">
+                  <div class="typing-dots">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                  </div>
+                  <span class="typing-text">Mohra AI is analyzing taxonomy data...</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Message Input Bar -->
+      <footer class="chat-input-container">
+        <form class="chat-input-form" (submit)="$event.preventDefault(); sendMessage()">
+          <textarea 
+            class="chat-textarea" 
+            [(ngModel)]="userQuestion"
+            name="question"
+            rows="1"
+            placeholder="Ask Mohra AI about animals, taxonomy, habitats..."
+            (keydown)="onKeyDown($event)"
+            [disabled]="isSendingMessage()"
+          ></textarea>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary send-msg-btn"
+            [disabled]="!userQuestion().trim() || isSendingMessage()"
+            title="Send message to AI"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+
+  </div>
+</div>

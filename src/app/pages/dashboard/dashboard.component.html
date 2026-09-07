@@ -1,0 +1,421 @@
+<div class="dashboard-page">
+  <!-- Dashboard Header -->
+  <header class="dashboard-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="user-profile-section">
+          <div class="user-avatar-large">
+            {{ (currentUser()?.fullName || currentUser()?.email || 'U').charAt(0).toUpperCase() }}
+          </div>
+          <div class="user-details">
+            <div class="badge badge-cumin">Biological Research Portal</div>
+            <h1 class="welcome-title">
+              Welcome back, <span class="highlight-name">{{ currentUser()?.fullName || 'Researcher' }}</span>
+            </h1>
+            <p class="welcome-subtitle">
+              Explore your saved taxonomy, favorite species, and AI conversations.
+            </p>
+            <div class="user-meta-tags">
+              @if (currentUser()?.email) {
+                <span class="meta-tag">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                  </svg>
+                  {{ currentUser()?.email }}
+                </span>
+              }
+              @if (currentUser()?.university) {
+                <span class="meta-tag university-tag">
+                  🎓 {{ currentUser()?.university }}
+                </span>
+              }
+              @if (currentUser()?.faculty) {
+                <span class="meta-tag faculty-tag">
+                  🏛️ {{ currentUser()?.faculty }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 2-Column Dashboard Layout with Left Vertical Sidebar -->
+  <div class="container dashboard-layout-container">
+    <!-- Left Vertical Navigation Sidebar -->
+    <aside class="dashboard-sidebar" aria-label="Dashboard navigation">
+      <div class="sidebar-sticky-wrapper">
+        <div class="sidebar-header">
+          <span class="sidebar-header-icon">🧭</span>
+          <span class="sidebar-header-title">Menu</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <!-- 1. Dashboard -->
+          <button 
+            type="button" 
+            class="sidebar-nav-item" 
+            [class.active]="activeSection() === 'overview'"
+            (click)="scrollToSection('top', 'overview', $event)"
+          >
+            <span class="nav-item-icon">📊</span>
+            <span class="nav-item-label">Dashboard</span>
+          </button>
+
+          <!-- 2. Animals -->
+          <a routerLink="/animals" class="sidebar-nav-item">
+            <span class="nav-item-icon">🦁</span>
+            <span class="nav-item-label">Animals</span>
+          </a>
+
+          <!-- 3. Categories -->
+          <a routerLink="/categories" class="sidebar-nav-item">
+            <span class="nav-item-icon">🗂️</span>
+            <span class="nav-item-label">Categories</span>
+          </a>
+
+          <div class="sidebar-nav-divider"></div>
+          <span class="sidebar-section-heading">Saved Collections</span>
+
+          <!-- 4. Favorite Animals -->
+          <button 
+            type="button" 
+            class="sidebar-nav-item" 
+            [class.active]="activeSection() === 'animals'"
+            (click)="scrollToSection('favorite-animals-section', 'animals', $event)"
+          >
+            <span class="nav-item-icon">🐾</span>
+            <span class="nav-item-label">Favorite Animals</span>
+            @if (favoriteAnimals().length > 0) {
+              <span class="nav-item-badge">{{ favoriteAnimals().length }}</span>
+            }
+          </button>
+
+          <!-- 5. Favorite Categories -->
+          <button 
+            type="button" 
+            class="sidebar-nav-item" 
+            [class.active]="activeSection() === 'categories'"
+            (click)="scrollToSection('favorite-categories-section', 'categories', $event)"
+          >
+            <span class="nav-item-icon">⭐</span>
+            <span class="nav-item-label">Favorite Categories</span>
+            @if (favoriteCategories().length > 0) {
+              <span class="nav-item-badge">{{ favoriteCategories().length }}</span>
+            }
+          </button>
+
+          <!-- 6. AI Chats -->
+          <button 
+            type="button" 
+            class="sidebar-nav-item" 
+            [class.active]="activeSection() === 'chats'"
+            (click)="scrollToSection('ai-chats-section', 'chats', $event)"
+          >
+            <span class="nav-item-icon">💬</span>
+            <span class="nav-item-label">AI Chats</span>
+            @if (chatSessions().length > 0) {
+              <span class="nav-item-badge ai-badge-count">{{ chatSessions().length }}</span>
+            }
+          </button>
+        </nav>
+
+        <!-- Sidebar AI Research Box -->
+        <div class="sidebar-ai-box">
+          <div class="sidebar-ai-box-inner">
+            <div class="sidebar-ai-icon-wrap">🤖</div>
+            <h4 class="sidebar-ai-title">Mohra AI</h4>
+            <p class="sidebar-ai-desc">Instant taxonomy classification & species inquiries.</p>
+            <button class="btn btn-primary btn-sm btn-block" (click)="startNewChat()">
+              Ask AI Assistant
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Right Area -->
+    <main class="dashboard-main-content">
+      <!-- AI Taxonomy Assistant Hero Card -->
+      <section class="ai-callout-card card">
+        <div class="ai-callout-content">
+          <div class="ai-emblem-wrap">
+            <span class="ai-icon">🤖</span>
+          </div>
+          <div class="ai-text-wrap">
+            <div class="ai-badge-row">
+              <span class="ai-badge">Gemini-Powered Intelligence</span>
+              <span class="ai-pulse-dot"></span>
+            </div>
+            <h2 class="ai-card-title">AI Taxonomy Assistant</h2>
+            <p class="ai-card-desc">
+              Ask questions about animals, taxonomy, biological classification, natural habitats, and ecological relationships.
+            </p>
+          </div>
+        </div>
+        <div class="ai-callout-actions">
+          <button class="btn btn-primary launch-ai-btn" (click)="startNewChat()">
+            <span>Ask Mohra AI</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- Overview Statistics Summary -->
+      <section class="stats-overview-grid">
+        <div class="stat-card card" (click)="scrollToSection('favorite-animals-section', 'animals', $event)">
+          <div class="stat-icon-wrap icon-animals">🐾</div>
+          <div class="stat-data">
+            <span class="stat-value">{{ stats().animalsCount }}</span>
+            <span class="stat-label">Favorite Species</span>
+          </div>
+        </div>
+
+        <div class="stat-card card" (click)="scrollToSection('favorite-categories-section', 'categories', $event)">
+          <div class="stat-icon-wrap icon-categories">🏷️</div>
+          <div class="stat-data">
+            <span class="stat-value">{{ stats().categoriesCount }}</span>
+            <span class="stat-label">Favorite Categories</span>
+          </div>
+        </div>
+
+        <div class="stat-card card" (click)="scrollToSection('ai-chats-section', 'chats', $event)">
+          <div class="stat-icon-wrap icon-chats">💬</div>
+          <div class="stat-data">
+            <span class="stat-value">{{ stats().chatsCount }}</span>
+            <span class="stat-label">AI Research Chats</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 1: Favorite Animals -->
+      <section id="favorite-animals-section" class="dashboard-section card">
+        <div class="section-header-row">
+          <div class="section-title-group">
+            <h2 class="section-title">
+              <span class="section-icon">🐾</span> Favorite Animals
+            </h2>
+            <span class="count-pill">{{ favoriteAnimals().length }} saved</span>
+          </div>
+          <a routerLink="/animals" class="section-action-link">
+            Explore Catalog →
+          </a>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoadingAnimals()) {
+          <div class="cards-grid">
+            @for (item of [1, 2, 3, 4]; track item) {
+              <div class="animal-mini-card skeleton-card">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-content">
+                  <div class="skeleton-line title"></div>
+                  <div class="skeleton-line sub"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (!isLoadingAnimals() && animalsError()) {
+          <div class="error-banner">
+            <p>⚠️ {{ animalsError() }}</p>
+            <button class="btn btn-secondary btn-sm" (click)="loadFavoriteAnimals()">Retry</button>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoadingAnimals() && !animalsError() && favoriteAnimals().length === 0) {
+          <div class="empty-section-state">
+            <div class="empty-icon">🐾</div>
+            <h3 class="empty-title">You haven't saved any animals yet</h3>
+            <p class="empty-desc">Discover and bookmark your favorite wildlife species across the global catalog.</p>
+            <a routerLink="/animals" class="btn btn-primary btn-sm">Explore Animals</a>
+          </div>
+        }
+
+        <!-- Animals Grid -->
+        @if (!isLoadingAnimals() && !animalsError() && favoriteAnimals().length > 0) {
+          <div class="cards-grid">
+            @for (fav of favoriteAnimals(); track fav.id) {
+              <div class="animal-mini-card" (click)="viewAnimalDetails(fav.animalId)">
+                <div class="mini-card-image-wrap">
+                  @if (fav.imageUrl) {
+                    <img [src]="fav.imageUrl" [alt]="fav.animalName" class="mini-card-img" loading="lazy" />
+                  } @else {
+                    <div class="placeholder-img">
+                      <span>🐾</span>
+                    </div>
+                  }
+                  <button 
+                    class="remove-fav-btn" 
+                    (click)="removeAnimal(fav.animalId, $event)"
+                    title="Remove from favorites"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div class="mini-card-body">
+                  <h3 class="mini-animal-name">{{ fav.animalName }}</h3>
+                  <span class="view-link">View Details →</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Section 2: Favorite Categories -->
+      <section id="favorite-categories-section" class="dashboard-section card">
+        <div class="section-header-row">
+          <div class="section-title-group">
+            <h2 class="section-title">
+              <span class="section-icon">🏷️</span> Favorite Categories
+            </h2>
+            <span class="count-pill">{{ favoriteCategories().length }} saved</span>
+          </div>
+          <a routerLink="/categories" class="section-action-link">
+            Taxonomy Tree →
+          </a>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoadingCategories()) {
+          <div class="categories-fav-grid">
+            @for (item of [1, 2, 3]; track item) {
+              <div class="category-fav-card skeleton-card">
+                <div class="skeleton-line title"></div>
+                <div class="skeleton-line sub"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (!isLoadingCategories() && categoriesError()) {
+          <div class="error-banner">
+            <p>⚠️ {{ categoriesError() }}</p>
+            <button class="btn btn-secondary btn-sm" (click)="loadFavoriteCategories()">Retry</button>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoadingCategories() && !categoriesError() && favoriteCategories().length === 0) {
+          <div class="empty-section-state">
+            <div class="empty-icon">🗂️</div>
+            <h3 class="empty-title">You haven't saved any categories yet</h3>
+            <p class="empty-desc">Explore the phylogenetic tree and save taxonomic groups for quick access.</p>
+            <a routerLink="/categories" class="btn btn-primary btn-sm">Explore Taxonomy</a>
+          </div>
+        }
+
+        <!-- Categories Grid -->
+        @if (!isLoadingCategories() && !categoriesError() && favoriteCategories().length > 0) {
+          <div class="categories-fav-grid">
+            @for (cat of favoriteCategories(); track cat.id) {
+              <div class="category-fav-card">
+                <div class="cat-card-top">
+                  <span class="rank-badge" [ngClass]="getRankBadgeClass(cat.rank)">{{ cat.rank || 'TAXON' }}</span>
+                  <button 
+                    class="remove-fav-btn" 
+                    (click)="removeCategory(cat.categoryId, $event)"
+                    title="Remove from favorites"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <h3 class="cat-card-name">{{ cat.categoryName }}</h3>
+                <div class="cat-card-actions">
+                  <button class="btn btn-outline btn-sm view-cat-btn" (click)="viewCategoryAnimals(cat.categoryId)">
+                    <span>View Animals</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Section 3: Recent AI Conversations -->
+      <section id="ai-chats-section" class="dashboard-section card">
+        <div class="section-header-row">
+          <div class="section-title-group">
+            <h2 class="section-title">
+              <span class="section-icon">💬</span> Recent AI Conversations
+            </h2>
+            <span class="count-pill">{{ chatSessions().length }} sessions</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" (click)="startNewChat()">
+            + New Chat
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        @if (isLoadingChats()) {
+          <div class="chats-list">
+            @for (item of [1, 2, 3]; track item) {
+              <div class="chat-session-row skeleton-card">
+                <div class="skeleton-line title"></div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (!isLoadingChats() && chatsError()) {
+          <div class="error-banner">
+            <p>⚠️ {{ chatsError() }}</p>
+            <button class="btn btn-secondary btn-sm" (click)="loadChatSessions()">Retry</button>
+          </div>
+        }
+
+        <!-- Empty State -->
+        @if (!isLoadingChats() && !chatsError() && chatSessions().length === 0) {
+          <div class="empty-section-state">
+            <div class="empty-icon">💬</div>
+            <h3 class="empty-title">No conversations yet</h3>
+            <p class="empty-desc">Ask Mohra AI about animal behavior, evolutionary taxonomy, habitats, and more.</p>
+            <button class="btn btn-primary btn-sm" (click)="startNewChat()">Ask Mohra AI</button>
+          </div>
+        }
+
+        <!-- Chat Sessions List -->
+        @if (!isLoadingChats() && !chatsError() && chatSessions().length > 0) {
+          <div class="chats-list">
+            @for (session of chatSessions().slice(0, 5); track session.id) {
+              <div class="chat-session-row" (click)="openChatSession(session.id)">
+                <div class="chat-row-main">
+                  <span class="chat-row-icon">🧬</span>
+                  <div class="chat-row-text">
+                    <h4 class="chat-row-title">{{ session.title || 'Biological Research Session' }}</h4>
+                    <span class="chat-row-date">{{ formatDate(session.createdAt) }}</span>
+                  </div>
+                </div>
+                <div class="chat-row-actions">
+                  <span class="open-chat-label">Open Chat →</span>
+                  <button 
+                    class="delete-chat-btn" 
+                    (click)="deleteChat(session.id, $event)" 
+                    title="Delete chat session"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </main>
+  </div>
+</div>

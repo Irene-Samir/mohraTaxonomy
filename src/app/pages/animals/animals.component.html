@@ -1,0 +1,289 @@
+<div class="animals-page">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="badge badge-cumin">Biological Catalog</div>
+        <h1 class="page-title">Explore All Animals</h1>
+        <p class="page-description">
+          Browse through the complete taxonomy archive of classified species. Click any card to inspect detailed biological classification and full image galleries.
+        </p>
+
+        <!-- Search and Filter Bar -->
+        <div class="search-filter-box">
+          <div class="search-input-group">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input 
+              type="text" 
+              [ngModel]="animalSearchQuery()" 
+              (ngModelChange)="onAnimalSearchInput($event)"
+              placeholder="Search animals by common or scientific name..."
+              class="search-input"
+              aria-label="Search animals by common or scientific name"
+            />
+            @if (animalSearchQuery()) {
+              <button class="clear-search-btn" (click)="clearAnimalSearch()" title="Clear search">
+                ✕
+              </button>
+            }
+          </div>
+
+          <!-- Category filter tabs -->
+          @if (availableCategories().length > 0) {
+            <div class="category-pills-row">
+              <button 
+                class="category-pill" 
+                [class.active]="selectedCategory() === 'all'"
+                (click)="selectCategory('all')"
+              >
+                All Species ({{ animals().length }})
+              </button>
+              @for (cat of availableCategories(); track cat) {
+                <button 
+                  class="category-pill" 
+                  [class.active]="selectedCategory().toLowerCase() === cat.toLowerCase()"
+                  (click)="selectCategory(cat)"
+                >
+                  {{ cat }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="container main-animals-container">
+    <!-- Selected Taxonomy Category Banner (when filtered by categoryId) -->
+    @if (selectedTaxonomyNode(); as taxNode) {
+      <div class="taxonomy-filter-banner card">
+        <div class="taxonomy-banner-left">
+          <div class="taxonomy-banner-badge-row">
+            <span class="taxonomy-badge-label">Selected Category:</span>
+            <span class="rank-badge" [ngClass]="getRankBadgeClass(taxNode.rank)">{{ taxNode.rank }}</span>
+          </div>
+          <h2 class="taxonomy-banner-title">{{ taxNode.name }}</h2>
+
+          <!-- Taxonomy Lineage Path -->
+          <div class="taxonomy-banner-path-row">
+            <span class="path-label">Taxonomy Path:</span>
+            <div class="path-breadcrumbs">
+              @for (crumb of selectedTaxonomyPath(); track crumb.id; let last = $last) {
+                <span class="crumb-item" [class.is-last]="last">{{ crumb.name }}</span>
+                @if (!last) {
+                  <span class="crumb-sep">→</span>
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="taxonomy-banner-actions">
+          <a routerLink="/categories" class="btn btn-secondary btn-sm" title="Back to Taxonomy Tree">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Taxonomy Tree
+          </a>
+          <button class="btn btn-outline btn-sm clear-tax-btn" (click)="clearTaxonomyFilter()" title="Clear taxonomy category filter">
+            ✕ Clear Filter
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Error Alert State -->
+    @if (errorMessage()) {
+      <div class="error-state-card card">
+        <div class="error-icon-box">⚠️</div>
+        <h2 class="error-title">Unable to load animals</h2>
+        <p class="error-desc">{{ errorMessage() }}</p>
+        <button class="btn btn-primary" (click)="loadAnimals()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Retry Connection
+        </button>
+      </div>
+    }
+
+    <!-- Loading Skeleton State -->
+    @if (isLoading()) {
+      <div class="animals-grid">
+        @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+          <div class="animal-card skeleton-card">
+            <div class="skeleton-img"></div>
+            <div class="card-content">
+              <div class="skeleton-line skeleton-title"></div>
+              <div class="skeleton-line skeleton-subtitle"></div>
+              <div class="skeleton-line skeleton-badge"></div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Animals Content -->
+    @if (!isLoading() && !errorMessage()) {
+      @if (filteredAnimals().length === 0) {
+        <!-- Empty State -->
+        <div class="empty-state-card card">
+          <div class="empty-icon-box">🔍</div>
+          <h2 class="empty-title">No animals found</h2>
+          
+          @if (selectedTaxonomyNode(); as taxNode) {
+            @if (animalSearchQuery()) {
+              <p class="empty-desc">
+                No animals matching your search found under category <strong>"{{ taxNode.name }}"</strong>.
+              </p>
+            } @else {
+              <p class="empty-desc">
+                No species have been classified under <strong>"{{ taxNode.name }}"</strong> or its descendant categories yet.
+              </p>
+            }
+            <div class="empty-actions-row">
+              <button class="btn btn-primary btn-sm" (click)="clearTaxonomyFilter()">
+                View All Animals
+              </button>
+              <a routerLink="/categories" class="btn btn-secondary btn-sm">
+                Taxonomy Tree
+              </a>
+            </div>
+          } @else {
+            <p class="empty-desc">
+              @if (animalSearchQuery()) {
+                We couldn't find any animals matching "<strong>{{ animalSearchQuery() }}</strong>".
+              } @else {
+                No animals found for the selected filter.
+              }
+              Try searching for a different term or resetting filters.
+            </p>
+            <button class="btn btn-secondary" (click)="clearAllFilters()">
+              Reset Filters
+            </button>
+          }
+        </div>
+      } @else {
+        <!-- Results Information -->
+        <div class="results-meta">
+          <span>
+            Showing
+            <strong>{{ filteredAnimals().length }}</strong>
+            species
+          </span>
+
+          @if (animalSearchQuery() || selectedCategory() !== 'all') {
+            <span class="filter-indicator">
+              Filtered
+              <button class="reset-link" (click)="clearAllFilters()">
+                Clear
+              </button>
+            </span>
+          }
+        </div>
+
+        <!-- Animals Grid -->
+        <div class="animals-grid">
+          @for (animal of filteredAnimals(); track animal.id) {
+            <div
+              class="animal-card"
+              (click)="navigateToDetails(animal.id)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View details for ' + animal.name"
+            >
+              <!-- Card Image -->
+              <div class="card-image-wrap">
+                @if (animal.firstImageUrl) {
+                  <img
+                    [src]="animal.firstImageUrl"
+                    [alt]="animal.name"
+                    class="card-img"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="placeholder-image">
+                    <div class="placeholder-icon">🌿</div>
+                    <span class="placeholder-text">Mohra Taxonomy</span>
+                  </div>
+                }
+
+                <!-- Category -->
+                <div class="category-badge-pill">
+                  {{ animal.categoryName || 'Taxon' }}
+                </div>
+
+                <!-- Favorite -->
+                <button
+                  type="button"
+                  class="card-favorite-btn"
+                  [class.is-fav]="isFavorite(animal.id)"
+                  (click)="toggleFavorite($event, animal.id)"
+                  [attr.aria-label]="isFavorite(animal.id) ? 'Remove from favorites' : 'Add to favorites'"
+                  title="Favorite"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    [attr.fill]="isFavorite(animal.id) ? '#C53030' : 'none'"
+                    [attr.stroke]="isFavorite(animal.id) ? '#C53030' : 'currentColor'"
+                    stroke-width="2"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Card Body -->
+              <div class="card-body">
+                <h2 class="animal-name">{{ animal.name }}</h2>
+
+                @if (animal.scientificName) {
+                  <span class="animal-scientific">{{ animal.scientificName }}</span>
+                }
+
+                <div class="card-category-row">
+                  <span class="category-label">Category:</span>
+                  <span class="category-value">{{ animal.categoryName || 'Not Classified' }}</span>
+                </div>
+
+                <div class="card-footer-action">
+                  <span class="view-details-link">
+                    <span>View Details</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- See More Button -->
+        @if (hasMoreAnimals() && selectedCategory() === 'all') {
+          <div class="load-more-container">
+            <button
+              type="button"
+              class="btn btn-primary load-more-btn"
+              (click)="loadMore()"
+              [disabled]="isLoadingMore()"
+            >
+              @if (isLoadingMore()) {
+                <span>Loading...</span>
+              } @else {
+                <span>See More Animals</span>
+              }
+            </button>
+          </div>
+        }
+      }
+    }
+  </main>
+</div>

@@ -1,0 +1,137 @@
+/* ================= REGISTER COMPONENT SPECIFIC STYLES ================= */
+.visual-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.v-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.v-feature-icon {
+  font-size: 1.35rem;
+  background: rgba(255, 255, 255, 0.12);
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.v-feature-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.v-feature-desc {
+  font-size: 0.78rem;
+  color: #B5C9BC;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+/* Password Strength Indicator */
+.password-strength-wrap {
+  margin-top: 0.5rem;
+}
+
+.strength-bar-bg {
+  width: 100%;
+  height: 5px;
+  background-color: var(--border-color);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: var(--radius-full);
+}
+
+.strength-weak {
+  background-color: var(--danger-red);
+}
+
+.strength-medium {
+  background-color: var(--warm-cumin);
+}
+
+.strength-strong {
+  background-color: var(--success-green);
+}
+
+.strength-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  font-size: 0.775rem;
+}
+
+.strength-text {
+  color: var(--text-muted);
+}
+
+.strength-value {
+  font-weight: 700;
+}
+
+.val-weak {
+  color: var(--danger-red);
+}
+
+.val-medium {
+  color: var(--warm-cumin-hover);
+}
+
+.val-strong {
+  color: var(--success-green);
+}
+
+.form-select-custom {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2321593D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.custom-faculty-wrapper {
+  margin-top: -0.25rem;
+  margin-bottom: var(--spacing-md);
+  padding: 0.85rem;
+  background: rgba(33, 89, 61, 0.04);
+  border: 1.5px dashed var(--main-green);
+  border-radius: var(--radius-lg);
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+

@@ -1,0 +1,1417 @@
+<div class="admin-dashboard-page">
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="container header-container">
+      <div class="header-content">
+        <div class="admin-badge-wrap">
+          <span class="badge badge-admin">🛡️ Administrator Portal</span>
+          <span class="system-status-indicator">
+            <span class="status-dot"></span> System Live
+          </span>
+        </div>
+        <h1 class="admin-title">Mohra Taxonomy Management</h1>
+        <p class="admin-subtitle">
+          Manage biological catalogs, phylogenetic taxonomy hierarchy, animal photography, and GBIF synchronization.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <a routerLink="/dashboard" class="btn btn-outline btn-sm">
+          <span>User Dashboard</span>
+        </a>
+        <a routerLink="/animals" class="btn btn-secondary btn-sm">
+          <span>Public Catalog</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Status Notification Banner -->
+  @if (statusMessage(); as status) {
+    <div class="container notification-container">
+      <div class="status-alert" [ngClass]="'alert-' + status.type">
+        <span class="alert-icon">
+          @if (status.type === 'success') { ✓ }
+          @else if (status.type === 'error') { ✕ }
+          @else { ℹ }
+        </span>
+        <span class="alert-text">{{ status.text }}</span>
+        <button class="alert-close-btn" (click)="statusMessage.set(null)">✕</button>
+      </div>
+    </div>
+  }
+
+  <div class="container admin-main">
+    <!-- Top Statistics Overview Cards -->
+    <section class="stats-cards-grid">
+      <div class="stat-card card" (click)="setTab('users')">
+        <div class="stat-icon-wrap stat-users">👥</div>
+        <div class="stat-info">
+          <span class="stat-number">
+            @if (isLoadingStats()) { ... } @else { {{ totalUsersCount() }} }
+          </span>
+          <span class="stat-label">Total Users</span>
+        </div>
+      </div>
+
+      <div class="stat-card card" (click)="setTab('animals')">
+        <div class="stat-icon-wrap stat-animals">🦁</div>
+        <div class="stat-info">
+          <span class="stat-number">
+            @if (isLoadingStats()) { ... } @else { {{ totalAnimalsCount() }} }
+          </span>
+          <span class="stat-label">Total Animals</span>
+        </div>
+      </div>
+
+      <div class="stat-card card" (click)="setTab('categories')">
+        <div class="stat-icon-wrap stat-categories">🗂️</div>
+        <div class="stat-info">
+          <span class="stat-number">
+            @if (isLoadingStats()) { ... } @else { {{ totalCategoriesCount() }} }
+          </span>
+          <span class="stat-label">Total Categories</span>
+        </div>
+      </div>
+
+      <div class="stat-card card" (click)="setTab('gbif')">
+        <div class="stat-icon-wrap stat-sync">⚡</div>
+        <div class="stat-info">
+          <span class="stat-number">GBIF Live</span>
+          <span class="stat-label">Data Pipeline</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin Navigation Tabs -->
+    <nav class="admin-tabs-nav">
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'overview'" 
+        (click)="setTab('overview')"
+      >
+        <span>📊</span> Overview
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'animals'" 
+        (click)="setTab('animals')"
+      >
+        <span>🦁</span> Animals
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'animal-images'" 
+        (click)="setTab('animal-images')"
+      >
+        <span>📷</span> Animal Images
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'categories'" 
+        (click)="setTab('categories')"
+      >
+        <span>🗂️</span> Taxonomy Tree
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'gbif'" 
+        (click)="setTab('gbif')"
+      >
+        <span>🌍</span> GBIF
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'images'" 
+        (click)="setTab('images')"
+      >
+        <span>🖼️</span> Image Import
+      </button>
+      <button 
+        class="tab-btn" 
+        [class.active]="activeTab() === 'users'" 
+        (click)="setTab('users')"
+      >
+        <span>👥</span> Users
+      </button>
+    </nav>
+
+    <!-- ================= TAB 1: OVERVIEW & DATA SYNCHRONIZATION ================= -->
+    @if (activeTab() === 'overview') {
+      <div class="tab-pane-content">
+        <!-- Website Data Synchronization Card -->
+        <section class="sync-banner-card card">
+          <div class="sync-header">
+            <div class="sync-title-group">
+              <span class="sync-icon">🔄</span>
+              <div>
+                <h2 class="sync-title">Data Synchronization</h2>
+                <p class="sync-desc">
+                  Use these operations to update biological data and animal images from external GBIF and Wikimedia sources. The backend performs the actual import.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="sync-actions-grid sync-actions-grid-4">
+            <!-- 1. Import GBIF Data by Phylum -->
+            <div class="sync-action-box">
+              <div class="action-box-icon">🌍</div>
+              <h3>Import GBIF by Phylum</h3>
+              <p>Batch import species & taxonomy via <code>/api/Gbif/import-by-phylum</code></p>
+              
+              <div class="sync-params-row">
+                <div class="param-item">
+                  <label>Taxon Key</label>
+                  <input 
+                    type="number" 
+                    [ngModel]="gbifPhylumKey()" 
+                    (ngModelChange)="gbifPhylumKey.set(+$event)"
+                    placeholder="44"
+                    title="Higher Taxon Key (44 = Chordata)"
+                  />
+                </div>
+                <div class="param-item">
+                  <label>Batch Size</label>
+                  <input 
+                    type="number" 
+                    [ngModel]="gbifBatchSize()" 
+                    (ngModelChange)="gbifBatchSize.set(+$event)"
+                    placeholder="1000"
+                    title="Batch Size (e.g. 1000)"
+                  />
+                </div>
+                <div class="param-item">
+                  <label>Offset</label>
+                  <input 
+                    type="number" 
+                    [ngModel]="gbifOffset()" 
+                    (ngModelChange)="gbifOffset.set(+$event)"
+                    placeholder="0"
+                    title="Starting Offset"
+                  />
+                </div>
+              </div>
+
+              <button 
+                class="btn btn-primary btn-block"
+                (click)="startGbifImport()"
+                [disabled]="isImportingGbif()"
+              >
+                @if (isImportingGbif()) {
+                  <span>Importing Batch...</span>
+                } @else {
+                  <span>Import GBIF by Phylum</span>
+                }
+              </button>
+
+              @if (lastBatchResult(); as res) {
+                <div class="batch-result-pill">
+                  <span>Imported: <strong>{{ res.imported }}</strong></span>
+                  <span>Enriched: <strong>{{ res.enriched }}</strong></span>
+                  <span>Next: <strong>{{ res.nextOffset }}</strong></span>
+                </div>
+              }
+            </div>
+
+            <!-- 2. Import Single Animal by GBIF Key -->
+            <div class="sync-action-box">
+              <div class="action-box-icon">🎯</div>
+              <h3>Import Single Animal</h3>
+              <p>Import a specific animal via <code>/api/Gbif/import/&#123;gbifKey&#125;</code></p>
+              
+              <div class="single-import-field">
+                <label>GBIF Key</label>
+                <input 
+                  type="number" 
+                  [ngModel]="singleGbifKey()" 
+                  (ngModelChange)="singleGbifKey.set($event ? +$event : null)"
+                  placeholder="e.g. 2435099"
+                  min="1"
+                  class="single-key-input"
+                />
+              </div>
+
+              <button 
+                class="btn btn-primary btn-block"
+                (click)="startSingleGbifImport()"
+                [disabled]="isImportingSingleGbif() || !singleGbifKey()"
+              >
+                @if (isImportingSingleGbif()) {
+                  <span>Importing Animal...</span>
+                } @else {
+                  <span>Import Single Animal</span>
+                }
+              </button>
+
+              @if (lastSingleImportedAnimal(); as single) {
+                <div class="single-result-pill">
+                  ✅ <strong>{{ single.name || single.scientificName }}</strong>
+                </div>
+              }
+            </div>
+
+            <!-- 3. Import GBIF Images -->
+            <div class="sync-action-box">
+              <div class="action-box-icon">🖼️</div>
+              <h3>Import GBIF Images</h3>
+              <p>Import and associate external media links from GBIF media registry.</p>
+              <button 
+                class="btn btn-secondary btn-block"
+                (click)="startGbifImagesImport()"
+                [disabled]="isImportingGbifImages()"
+              >
+                @if (isImportingGbifImages()) {
+                  <span>Importing Images...</span>
+                } @else {
+                  <span>Import GBIF Images</span>
+                }
+              </button>
+            </div>
+
+            <!-- 4. Import All Animal Images -->
+            <div class="sync-action-box">
+              <div class="action-box-icon">🌐</div>
+              <h3>Import All Animal Images</h3>
+              <p>Query Wikimedia Commons API to enrich all species with scientific photography.</p>
+              <button 
+                class="btn btn-outline btn-block"
+                (click)="startAllAnimalImagesImport()"
+                [disabled]="isImportingAllImages()"
+              >
+                @if (isImportingAllImages()) {
+                  <span>Importing Wikimedia...</span>
+                } @else {
+                  <span>Import All Animal Images</span>
+                }
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Faculty Distribution Chart Card -->
+        <div class="card p-xl faculty-chart-card">
+          <div class="box-header mb-md">
+            <div>
+              <h3>🎓 Users Distribution by Faculty (توزيع المستخدمين حسب الكلية)</h3>
+              <p class="text-secondary text-sm">Real-time breakdown of registered platform users, researchers, and students by faculty affiliation.</p>
+            </div>
+            <button class="btn btn-sm btn-secondary" (click)="loadFacultyStats()">Refresh Chart</button>
+          </div>
+
+          @if (isLoadingFacultyStats()) {
+            <p class="text-center py-4"><span class="spinner"></span> Loading faculty breakdown...</p>
+          }
+
+          @if (!isLoadingFacultyStats() && facultyStats().length === 0) {
+            <p class="text-center text-muted py-4">No user faculty data registered yet.</p>
+          }
+
+          @if (!isLoadingFacultyStats() && facultyStats().length > 0) {
+            <div class="faculty-chart-grid">
+              <!-- Left: Donut Chart -->
+              <div class="donut-card">
+                <div class="donut-svg-wrapper">
+                  <svg viewBox="0 0 180 180" class="donut-svg">
+                    <!-- Base Track -->
+                    <circle
+                      cx="90"
+                      cy="90"
+                      r="70"
+                      fill="transparent"
+                      stroke="#E5E7EB"
+                      stroke-width="20"
+                    />
+                    <!-- Segments -->
+                    @for (slice of donutSlices(); track slice.faculty) {
+                      <circle
+                        cx="90"
+                        cy="90"
+                        r="70"
+                        fill="transparent"
+                        [attr.stroke]="slice.color"
+                        stroke-width="20"
+                        [attr.stroke-dasharray]="slice.strokeDasharray"
+                        [attr.stroke-dashoffset]="slice.strokeDashoffset"
+                        class="donut-segment"
+                        transform="rotate(-90 90 90)"
+                        (mouseenter)="selectedFacultySlice.set(slice)"
+                        (mouseleave)="selectedFacultySlice.set(null)"
+                      />
+                    }
+                  </svg>
+                  <div class="donut-center-content">
+                    @if (selectedFacultySlice(); as sel) {
+                      <span class="donut-center-number" [style.color]="getFacultyColor(sel.faculty)">{{ sel.percentage }}%</span>
+                      <span class="donut-center-sub">{{ sel.count }} users</span>
+                    } @else {
+                      <span class="donut-center-number">{{ totalUsersCount() }}</span>
+                      <span class="donut-center-sub">Total Users</span>
+                    }
+                  </div>
+                </div>
+
+                @if (selectedFacultySlice(); as sel) {
+                  <div class="donut-info-pill" [style.border-color]="getFacultyColor(sel.faculty)">
+                    <span>{{ getFacultyIcon(sel.faculty) }}</span>
+                    <strong>{{ sel.faculty }}</strong>: {{ sel.count }} ({{ sel.percentage }}%)
+                  </div>
+                }
+              </div>
+
+              <!-- Right: Faculty Breakdown Bars -->
+              <div class="faculty-bars-card">
+                <div class="faculty-bars-list">
+                  @for (item of facultyStats(); track item.faculty; let i = $index) {
+                    <div 
+                      class="faculty-bar-item"
+                      (mouseenter)="selectedFacultySlice.set(item)"
+                      (mouseleave)="selectedFacultySlice.set(null)"
+                    >
+                      <div class="bar-header">
+                        <div class="bar-name-group">
+                          <span class="bar-icon">{{ getFacultyIcon(item.faculty) }}</span>
+                          <span class="bar-title">{{ item.faculty }}</span>
+                        </div>
+                        <div class="bar-badge-group">
+                          <span class="bar-count"><strong>{{ item.count }}</strong> users</span>
+                          <span class="bar-percentage" [style.color]="getFacultyColor(item.faculty, i)">{{ item.percentage }}%</span>
+                        </div>
+                      </div>
+                      <div class="bar-track">
+                        <div 
+                          class="bar-fill" 
+                          [style.width.%]="item.percentage"
+                          [style.background-color]="getFacultyColor(item.faculty, i)"
+                        ></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Quick Summary Grids -->
+        <div class="overview-split-grid">
+          <div class="card summary-box">
+            <div class="box-header">
+              <h3>🐾 Catalog Animals</h3>
+              <button class="btn btn-sm btn-outline" (click)="setTab('animals')">Manage Animals</button>
+            </div>
+            <ul class="quick-list">
+              @for (animal of animals().slice(0, 5); track animal.id) {
+                <li class="quick-item">
+                  <div>
+                    <strong>{{ animal.name }}</strong>
+                    <span class="quick-meta">{{ animal.scientificName || 'No binomial name' }}</span>
+                  </div>
+                  <span class="badge badge-cumin">{{ animal.categoryName || 'Taxon' }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <div class="card summary-box">
+            <div class="box-header">
+              <h3>🗂️ Taxonomy Structure</h3>
+              <button class="btn btn-sm btn-outline" (click)="setTab('categories')">Explore Hierarchy</button>
+            </div>
+            <ul class="quick-list">
+              @for (cat of flatCategories().slice(0, 5); track cat.id) {
+                <li class="quick-item">
+                  <div>
+                    <strong>{{ cat.name }}</strong>
+                    <span class="quick-meta">{{ cat.rank }}</span>
+                  </div>
+                  <a [routerLink]="['/animals']" [queryParams]="{ categoryId: cat.id }" class="table-link">
+                    View Species →
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB 2: ANIMALS MANAGEMENT ================= -->
+    @if (activeTab() === 'animals') {
+      <div class="tab-pane-content">
+        <div class="section-top-bar">
+          <div class="search-input-box">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search animals by name, scientific name, category..."
+              [(ngModel)]="animalSearchQuery"
+            />
+          </div>
+
+          <button class="btn btn-primary" (click)="openAddAnimalModal()">
+            <span>+ Add Animal</span>
+          </button>
+        </div>
+
+        <div class="table-responsive card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Animal Name</th>
+                <th>Scientific Name</th>
+                <th>Category</th>
+                <th>Habitat / Diet</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (isLoadingAnimals()) {
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <span class="spinner"></span> Loading animals...
+                  </td>
+                </tr>
+              }
+
+              @if (!isLoadingAnimals() && filteredAnimalsList().length === 0) {
+                <tr>
+                  <td colspan="6" class="text-center py-4 text-muted">
+                    No animals found.
+                  </td>
+                </tr>
+              }
+
+              @if (!isLoadingAnimals()) {
+                @for (animal of filteredAnimalsList(); track animal.id) {
+                  <tr>
+                    <td class="font-mono text-muted">#{{ animal.id }}</td>
+                    <td>
+                      <strong>{{ animal.name }}</strong>
+                    </td>
+                    <td class="italic-text">{{ animal.scientificName || '—' }}</td>
+                    <td>
+                      <span class="badge badge-primary">{{ animal.categoryName || 'Taxon' }}</span>
+                    </td>
+                    <td class="text-muted text-sm">
+                      {{ animal.habitat || animal.diet || '—' }}
+                    </td>
+                    <td class="text-right actions-cell">
+                      <button 
+                        class="action-icon-btn image-btn" 
+                        (click)="selectAnimalForImageManagement(animal)"
+                        title="Manage animal images"
+                      >
+                        📷
+                      </button>
+                      <button 
+                        class="action-icon-btn edit-btn" 
+                        (click)="openEditAnimalModal(animal)"
+                        title="Edit animal details"
+                      >
+                        ✏️
+                      </button>
+                      <a 
+                        [routerLink]="['/animals', animal.id]" 
+                        class="action-icon-btn view-btn"
+                        title="View public animal page"
+                        target="_blank"
+                      >
+                        👁️
+                      </a>
+                      <button 
+                        class="action-icon-btn delete-btn" 
+                        (click)="confirmDeleteAnimal(animal)"
+                        title="Delete animal record"
+                      >
+                        🗑️
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-bar">
+          <span class="pagination-info">
+            Page {{ animalsPage() }} of {{ totalAnimalsPages() }} ({{ totalAnimalsCount() }} total species)
+          </span>
+          <div class="pagination-buttons">
+            <button 
+              class="btn btn-secondary btn-sm" 
+              (click)="goToAnimalsPage(animalsPage() - 1)"
+              [disabled]="animalsPage() <= 1"
+            >
+              Previous
+            </button>
+            <button 
+              class="btn btn-secondary btn-sm" 
+              (click)="goToAnimalsPage(animalsPage() + 1)"
+              [disabled]="animalsPage() >= totalAnimalsPages()"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB 3: ANIMAL IMAGES MANAGEMENT ================= -->
+    @if (activeTab() === 'animal-images') {
+      <div class="tab-pane-content">
+        <!-- Animal Selector Header -->
+        <div class="card p-xl mb-lg">
+          <div class="animal-images-header-row">
+            <div>
+              <h2>Animal Photography & Images</h2>
+              <p class="text-secondary">
+                Upload and manage high-resolution photography for each catalog species. (Category images are not used).
+              </p>
+            </div>
+
+            <div class="animal-select-wrapper">
+              <label class="form-label">Select Animal:</label>
+              <select 
+                class="form-select" 
+                [value]="selectedAnimalForImages()?.id || ''"
+                (change)="onAnimalSelectChange($event)"
+              >
+                <option value="" disabled>-- Select Animal --</option>
+                @for (animal of animals(); track animal.id) {
+                  <option [value]="animal.id">{{ animal.name }} (#{{ animal.id }})</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        @if (selectedAnimalForImages(); as selectedAnimal) {
+          <div class="animal-images-layout">
+            <!-- Left: Upload New Image Card -->
+            <div class="card p-xl upload-card">
+              <div class="box-header mb-md">
+                <h3>Upload Image for "{{ selectedAnimal.name }}"</h3>
+              </div>
+
+              <form (submit)="$event.preventDefault(); uploadImageForAnimal()" class="upload-form">
+                <div class="form-group">
+                  <label class="form-label">Select Image File (PNG, JPG, WebP) *</label>
+                  <input 
+                    type="file" 
+                    class="form-input" 
+                    accept="image/*"
+                    (change)="onImageFileSelected($event)" 
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Description / Caption (Optional)</label>
+                  <input 
+                    type="text" 
+                    class="form-input" 
+                    placeholder="e.g. Dorsal view of specimen, anatomical illustration"
+                    [(ngModel)]="uploadImageDescription"
+                    name="imageDescription"
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  class="btn btn-primary btn-block"
+                  [disabled]="!selectedImageFile || isUploadingImage()"
+                >
+                  @if (isUploadingImage()) {
+                    <span>Uploading...</span>
+                  } @else {
+                    <span>Upload Image (POST /api/AnimalImage/{{ selectedAnimal.id }})</span>
+                  }
+                </button>
+              </form>
+            </div>
+
+            <!-- Right: Existing Images Grid -->
+            <div class="card p-xl images-display-card">
+              <div class="box-header mb-md">
+                <h3>Gallery Images ({{ animalImagesList().length }})</h3>
+                <button 
+                  class="btn btn-sm btn-secondary" 
+                  (click)="loadImagesForSelectedAnimal(selectedAnimal.id)"
+                >
+                  Refresh Gallery
+                </button>
+              </div>
+
+              @if (isLoadingAnimalImages()) {
+                <div class="text-center py-4">
+                  <span class="spinner"></span> Loading gallery images...
+                </div>
+              }
+
+              @if (!isLoadingAnimalImages() && animalImagesList().length === 0) {
+                <div class="empty-gallery-state">
+                  <span class="empty-icon">📷</span>
+                  <p>No images uploaded yet for <strong>{{ selectedAnimal.name }}</strong>.</p>
+                  <span class="text-muted text-sm">Use the form on the left to upload photography.</span>
+                </div>
+              }
+
+              @if (!isLoadingAnimalImages() && animalImagesList().length > 0) {
+                <div class="admin-image-grid">
+                  @for (img of animalImagesList(); track img.id) {
+                    <div class="admin-image-item">
+                      <div class="image-thumb-wrap">
+                        <img [src]="img.imageUrl" [alt]="img.description || selectedAnimal.name" class="image-thumb" />
+                        <button 
+                          class="delete-image-overlay-btn"
+                          (click)="confirmDeleteImage(img)"
+                          title="Delete image (DELETE /api/AnimalImage/{{ img.id }})"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                      <div class="image-item-meta">
+                        <span class="image-id-tag">ID: #{{ img.id }}</span>
+                        <span class="image-desc-text">{{ img.description || 'No description' }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="card p-xl text-center text-muted">
+            Please select an animal above to manage its images.
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ================= TAB 4: CATEGORIES / TAXONOMY MANAGEMENT ================= -->
+    @if (activeTab() === 'categories') {
+      <div class="tab-pane-content">
+        <div class="section-top-bar">
+          <div class="search-input-box">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35"/>
+            </svg>
+            <input 
+              type="text" 
+              placeholder="Search taxonomy categories..."
+              [(ngModel)]="categorySearchQuery"
+            />
+          </div>
+
+          <button class="btn btn-primary" (click)="openAddCategoryModal()">
+            <span>+ Add Root Category</span>
+          </button>
+        </div>
+
+        <!-- Hierarchical Tree Card -->
+        <div class="card p-xl">
+          <div class="box-header mb-md">
+            <div>
+              <h3>Phylogenetic Taxonomy Hierarchy</h3>
+              <p class="text-secondary text-sm">
+                Recursive parent-child structure supporting unlimited nesting. Categories do NOT possess images.
+              </p>
+            </div>
+            <button class="btn btn-sm btn-secondary" (click)="loadAllStatistics()">
+              Refresh Tree
+            </button>
+          </div>
+
+          @if (isLoadingStats()) {
+            <p class="text-center py-4"><span class="spinner"></span> Loading taxonomy tree...</p>
+          }
+
+          @if (!isLoadingStats() && taxonomyTree().length === 0) {
+            <p class="text-muted text-center py-4">No taxonomy categories available.</p>
+          }
+
+          @if (!isLoadingStats() && taxonomyTree().length > 0) {
+            <div class="taxonomy-tree-container">
+              <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: taxonomyTree() }"></ng-container>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- RECURSIVE TREE TEMPLATE FOR UNLIMITED NESTING -->
+    <ng-template #nodeTemplate let-nodes>
+      <ul class="tree-nodes-list">
+        @for (node of nodes; track node.id) {
+          <li class="tree-node-item">
+            <div class="tree-node-row">
+              <!-- Expand/Collapse toggle button -->
+              @if (node.children && node.children.length > 0) {
+                <button class="tree-toggle-btn" (click)="toggleNode(node.id)">
+                  {{ isNodeExpanded(node.id) ? '▼' : '▶' }}
+                </button>
+              } @else {
+                <span class="tree-leaf-bullet">•</span>
+              }
+
+              <!-- Rank badge -->
+              <span class="rank-badge" [ngClass]="getRankBadgeClass(node.rank)">
+                {{ node.rank || 'TAXON' }}
+              </span>
+
+              <!-- Category Thumbnail if available -->
+              @if (node.imageUrl) {
+                <img [src]="node.imageUrl" [alt]="node.name" class="category-tree-thumb" />
+              }
+
+              <!-- Node Name -->
+              <span class="node-name">
+                <strong>{{ node.name }}</strong>
+                <span class="text-muted font-mono text-xs">(#{{ node.id }})</span>
+              </span>
+
+              <!-- Actions on hover -->
+              <div class="node-actions">
+                <button 
+                  class="action-icon-btn add-sub-btn" 
+                  (click)="openAddCategoryModal(node.id)"
+                  title="Add child sub-category under {{ node.name }}"
+                >
+                  ➕
+                </button>
+                <button 
+                  class="action-icon-btn edit-btn" 
+                  (click)="openEditCategoryModal(node)"
+                  title="Edit category"
+                >
+                  ✏️
+                </button>
+                <a 
+                  [routerLink]="['/animals']" 
+                  [queryParams]="{ categoryId: node.id }"
+                  class="action-icon-btn view-btn"
+                  title="View all animals in this category"
+                  target="_blank"
+                >
+                  🦁
+                </a>
+                <button 
+                  class="action-icon-btn delete-btn" 
+                  (click)="confirmDeleteCategory(node)"
+                  title="Delete category"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+
+            <!-- Recursive Children -->
+            @if (node.children && node.children.length > 0 && isNodeExpanded(node.id)) {
+              <div class="tree-children-container">
+                <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.children }"></ng-container>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    </ng-template>
+
+    <!-- ================= TAB 5: GBIF INTEGRATION ================= -->
+    @if (activeTab() === 'gbif') {
+      <div class="tab-pane-content">
+        <div class="card p-xl mb-lg">
+          <div class="sync-header mb-md">
+            <div class="sync-title-group">
+              <span class="sync-icon">🌍</span>
+              <div>
+                <h2>Global Biodiversity Information Facility (GBIF)</h2>
+                <p class="text-secondary">
+                  Synchronize your taxonomy and species data with GBIF international biological standards.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="gbif-operations-grid">
+            <!-- 1. Batch Import by Phylum Card -->
+            <div class="gbif-op-card">
+              <div class="op-card-header">
+                <span class="op-icon">📦</span>
+                <div>
+                  <h4>Batch Import by Phylum</h4>
+                  <span class="api-tag">POST /api/Gbif/import-by-phylum</span>
+                </div>
+              </div>
+              <p class="text-secondary text-sm">
+                Imports entire phylum taxonomy with related classes, orders, families, and species.
+              </p>
+
+              <div class="params-horizontal-grid">
+                <div class="form-group-sm">
+                  <label>Higher Taxon Key</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [ngModel]="gbifPhylumKey()" 
+                    (ngModelChange)="gbifPhylumKey.set(+$event)"
+                    placeholder="44"
+                  />
+                  <small class="text-muted">Default: 44 (Chordata)</small>
+                </div>
+
+                <div class="form-group-sm">
+                  <label>Batch Size</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [ngModel]="gbifBatchSize()" 
+                    (ngModelChange)="gbifBatchSize.set(+$event)"
+                    placeholder="1000"
+                  />
+                  <small class="text-muted">Default: 1000</small>
+                </div>
+
+                <div class="form-group-sm">
+                  <label>Offset</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [ngModel]="gbifOffset()" 
+                    (ngModelChange)="gbifOffset.set(+$event)"
+                    placeholder="0"
+                  />
+                  <small class="text-muted">Default: 0</small>
+                </div>
+              </div>
+
+              <div class="op-card-actions">
+                <button 
+                  class="btn btn-primary"
+                  (click)="startGbifImport()"
+                  [disabled]="isImportingGbif()"
+                >
+                  @if (isImportingGbif()) {
+                    <span class="spinner-inline"></span>
+                    <span>Importing Species...</span>
+                  } @else {
+                    <span>Start Batch Import</span>
+                  }
+                </button>
+              </div>
+
+              @if (lastBatchResult(); as batchRes) {
+                <div class="batch-report-card">
+                  <div class="report-header">
+                    <strong>Batch Import Summary</strong>
+                    <span class="badge badge-success">Completed</span>
+                  </div>
+                  <div class="report-stats">
+                    <div class="report-stat-item">
+                      <span class="label">Processed</span>
+                      <span class="val">{{ batchRes.processed }}</span>
+                    </div>
+                    <div class="report-stat-item">
+                      <span class="label">Imported</span>
+                      <span class="val text-success">{{ batchRes.imported }}</span>
+                    </div>
+                    <div class="report-stat-item">
+                      <span class="label">Enriched</span>
+                      <span class="val text-primary">{{ batchRes.enriched }}</span>
+                    </div>
+                    <div class="report-stat-item">
+                      <span class="label">Next Offset</span>
+                      <span class="val text-accent">{{ batchRes.nextOffset }}</span>
+                    </div>
+                  </div>
+                  @if (batchRes.message) {
+                    <p class="report-message">{{ batchRes.message }}</p>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- 2. Single Animal Import Card -->
+            <div class="gbif-op-card">
+              <div class="op-card-header">
+                <span class="op-icon">🎯</span>
+                <div>
+                  <h4>Import Single Animal by Key</h4>
+                  <span class="api-tag">POST /api/Gbif/import/&#123;gbifKey&#125;</span>
+                </div>
+              </div>
+              <p class="text-secondary text-sm">
+                Enter a specific GBIF species key (e.g. <code>2435099</code> for Panthera leo) to import its complete taxonomy and details.
+              </p>
+
+              <div class="single-animal-form">
+                <div class="form-group-sm">
+                  <label>GBIF Taxon Key (ID)</label>
+                  <input 
+                    type="number" 
+                    class="form-control"
+                    [ngModel]="singleGbifKey()" 
+                    (ngModelChange)="singleGbifKey.set($event ? +$event : null)"
+                    placeholder="e.g. 2435099"
+                    min="1"
+                  />
+                  <small class="text-muted">Numeric key from GBIF registry</small>
+                </div>
+
+                <button 
+                  class="btn btn-secondary mt-sm"
+                  (click)="startSingleGbifImport()"
+                  [disabled]="isImportingSingleGbif() || !singleGbifKey()"
+                >
+                  @if (isImportingSingleGbif()) {
+                    <span class="spinner-inline"></span>
+                    <span>Importing...</span>
+                  } @else {
+                    <span>Import This Animal</span>
+                  }
+                </button>
+              </div>
+
+              @if (lastSingleImportedAnimal(); as singleAnimal) {
+                <div class="single-animal-preview-box">
+                  <div class="single-animal-header">
+                    <div>
+                      <h5>{{ singleAnimal.name || singleAnimal.scientificName }}</h5>
+                      <span class="italic-text text-sm text-secondary">{{ singleAnimal.scientificName }}</span>
+                    </div>
+                    <span class="badge badge-success">Imported</span>
+                  </div>
+                  <div class="single-animal-details">
+                    <div><strong>Taxon:</strong> {{ singleAnimal.categoryName || 'Taxon' }}</div>
+                    @if (singleAnimal.id) {
+                      <div><a [routerLink]="['/animals', singleAnimal.id]" target="_blank" class="table-link">Open Animal Page →</a></div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-xl">
+          <div class="box-header mb-md">
+            <div>
+              <h3>GBIF Animals Feed Preview</h3>
+              <p class="text-secondary text-sm">Browse available species in the GBIF registry feed and import individual items directly.</p>
+            </div>
+            <button class="btn btn-sm btn-secondary" (click)="loadGbifPreview()">Refresh Feed</button>
+          </div>
+
+          @if (isLoadingGbif()) {
+            <p class="text-center py-4"><span class="spinner"></span> Loading GBIF data feed...</p>
+          }
+
+          @if (!isLoadingGbif() && gbifPreviewAnimals().length === 0) {
+            <p class="text-muted text-center py-4">No preview records currently cached.</p>
+          }
+
+          @if (!isLoadingGbif() && gbifPreviewAnimals().length > 0) {
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>GBIF Key</th>
+                    <th>Scientific Name</th>
+                    <th>Canonical Name</th>
+                    <th>Kingdom</th>
+                    <th>Rank</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (gbifItem of gbifPreviewAnimals().slice(0, 10); track gbifItem.key || gbifItem.id) {
+                    <tr>
+                      <td class="font-mono">{{ gbifItem.key || gbifItem.id }}</td>
+                      <td class="italic-text"><strong>{{ gbifItem.scientificName }}</strong></td>
+                      <td>{{ gbifItem.canonicalName || gbifItem.vernacularName || '—' }}</td>
+                      <td>{{ gbifItem.kingdom || 'Animalia' }}</td>
+                      <td><span class="rank-badge rank-default">{{ gbifItem.rank }}</span></td>
+                      <td class="text-right">
+                        <button 
+                          class="btn btn-sm btn-primary"
+                          (click)="startSingleGbifImport(gbifItem.key || gbifItem.id)"
+                          [disabled]="isImportingSingleGbif()"
+                          title="Import this single species into your database"
+                        >
+                          📥 Import
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB 6: IMAGE IMPORT ================= -->
+    @if (activeTab() === 'images') {
+      <div class="tab-pane-content">
+        <div class="card p-xl mb-lg">
+          <h2>Animal Media & Photography Pipeline</h2>
+          <p class="text-secondary mb-lg">
+            Import images from verified biological registries (GBIF External Media and Wikimedia Commons).
+          </p>
+
+          <div class="sync-actions-grid">
+            <div class="sync-action-box">
+              <div class="action-box-icon">🖼️</div>
+              <h3>1. GBIF Media Registry</h3>
+              <p>Import external images linked directly to GBIF taxonomic records.</p>
+              <button 
+                class="btn btn-secondary btn-block"
+                (click)="startGbifImagesImport()"
+                [disabled]="isImportingGbifImages()"
+              >
+                @if (isImportingGbifImages()) {
+                  <span>Importing...</span>
+                } @else {
+                  <span>Import GBIF Images</span>
+                }
+              </button>
+            </div>
+
+            <div class="sync-action-box">
+              <div class="action-box-icon">📷</div>
+              <h3>2. Single Animal Wikimedia</h3>
+              <p>Select an animal from the catalog to import high-resolution photography.</p>
+              <div class="single-animal-select-row">
+                <select [(ngModel)]="selectedAnimalForImageImport" class="form-select">
+                  <option [ngValue]="null">-- Select Animal --</option>
+                  @for (animal of animals(); track animal.id) {
+                    <option [ngValue]="animal.id">{{ animal.name }} (#{{ animal.id }})</option>
+                  }
+                </select>
+                <button 
+                  class="btn btn-primary"
+                  [disabled]="!selectedAnimalForImageImport() || isImportingSingleAnimalImage()"
+                  (click)="importSingleAnimalImage(selectedAnimalForImageImport()!)"
+                >
+                  Import
+                </button>
+              </div>
+            </div>
+
+            <div class="sync-action-box">
+              <div class="action-box-icon">🌐</div>
+              <h3>3. Batch Wikimedia Import</h3>
+              <p>Enrich the entire animal catalog with Wikimedia Commons photography.</p>
+              <button 
+                class="btn btn-outline btn-block"
+                (click)="startAllAnimalImagesImport()"
+                [disabled]="isImportingAllImages()"
+              >
+                @if (isImportingAllImages()) {
+                  <span>Importing All Images...</span>
+                } @else {
+                  <span>Import All Animal Images</span>
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ================= TAB 7: USERS MANAGEMENT ================= -->
+    @if (activeTab() === 'users') {
+      <div class="tab-pane-content">
+        <div class="section-top-bar">
+          <div>
+            <h2>Registered Users</h2>
+            <p class="text-secondary">Registered research platform accounts.</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" (click)="loadUsers()">Refresh Users</button>
+        </div>
+
+        <!-- Faculty Affiliation Summary in Users Tab -->
+        @if (!isLoadingFacultyStats() && facultyStats().length > 0) {
+          <div class="card p-lg faculty-chart-card">
+            <div class="box-header mb-sm">
+              <h4>🎓 Faculty Distribution (توزيع المستخدمين حسب الكلية)</h4>
+              <span class="badge badge-primary">{{ facultyStats().length }} Faculties</span>
+            </div>
+            <div class="faculty-mini-cards-grid">
+              @for (item of facultyStats(); track item.faculty; let i = $index) {
+                <div class="faculty-mini-card" [style.border-top-color]="getFacultyColor(item.faculty, i)">
+                  <div class="mini-card-icon">{{ getFacultyIcon(item.faculty) }}</div>
+                  <div class="mini-card-info">
+                    <span class="mini-card-name" [title]="item.faculty">{{ item.faculty }}</span>
+                    <div class="mini-card-numbers">
+                      <strong>{{ item.count }}</strong> users
+                      <span class="mini-card-percent" [style.color]="getFacultyColor(item.faculty, i)">({{ item.percentage }}%)</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="table-responsive card">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Full Name</th>
+                <th>Email Address</th>
+                <th>University</th>
+                <th>Faculty</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (isLoadingUsers()) {
+                <tr>
+                  <td colspan="5" class="text-center py-4">
+                    <span class="spinner"></span> Loading registered users...
+                  </td>
+                </tr>
+              }
+
+              @if (!isLoadingUsers() && usersList().length === 0) {
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted">
+                    No users loaded.
+                  </td>
+                </tr>
+              }
+
+              @if (!isLoadingUsers()) {
+                @for (u of usersList(); track u.id) {
+                  <tr>
+                    <td class="font-mono text-muted text-sm">{{ u.id }}</td>
+                    <td><strong>{{ u.fullName || '—' }}</strong></td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.university || '—' }}</td>
+                    <td>{{ u.faculty || '—' }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ================= ANIMAL MODAL (NO IMAGE FIELD) ================= -->
+  @if (showAnimalModal()) {
+    <div class="modal-backdrop" (click)="closeAnimalModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{ isEditingAnimal() ? 'Edit Animal Record' : 'Add New Animal' }}
+          </h2>
+          <button class="modal-close-btn" (click)="closeAnimalModal()">✕</button>
+        </div>
+
+        <form [formGroup]="animalForm" (submit)="$event.preventDefault(); saveAnimal()" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Animal Common Name *</label>
+            <input type="text" class="form-input" formControlName="name" placeholder="e.g. Hexarthra fennica" />
+            @if (animalForm.get('name')?.invalid && animalForm.get('name')?.touched) {
+              <span class="field-error">Name is required.</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Scientific / Binomial Name</label>
+            <input type="text" class="form-input" formControlName="scientificName" placeholder="e.g. Hexarthra fennica (Levander, 1892)" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Taxonomy Category *</label>
+            <select class="form-select" formControlName="categoryId">
+              <option [ngValue]="null">-- Select Category --</option>
+              @for (cat of flatCategories(); track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.name }} ({{ cat.rank }})</option>
+              }
+            </select>
+            @if (animalForm.get('categoryId')?.invalid && animalForm.get('categoryId')?.touched) {
+              <span class="field-error">Category is required.</span>
+            }
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Natural Habitat</label>
+              <input type="text" class="form-input" formControlName="habitat" placeholder="e.g. Brackish and saline waters" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Diet / Nutrition</label>
+              <input type="text" class="form-input" formControlName="diet" placeholder="e.g. Bacteria and microalgae" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Biological Description</label>
+            <textarea class="form-textarea" formControlName="description" rows="3" placeholder="Overview of anatomical and physiological traits..."></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeAnimalModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSavingAnimal()">
+              @if (isSavingAnimal()) {
+                <span>Saving...</span>
+              } @else {
+                <span>{{ isEditingAnimal() ? 'Save Changes' : 'Create Animal' }}</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= CATEGORY MODAL (NO CATEGORY IMAGE) ================= -->
+  @if (showCategoryModal()) {
+    <div class="modal-backdrop" (click)="closeCategoryModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{ isEditingCategory() ? 'Edit Taxonomy Category' : 'Add New Category' }}
+          </h2>
+          <button class="modal-close-btn" (click)="closeCategoryModal()">✕</button>
+        </div>
+
+        <form [formGroup]="categoryForm" (submit)="$event.preventDefault(); saveCategory()" class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Category Name *</label>
+            <input type="text" class="form-input" formControlName="name" placeholder="e.g. Chordata, Rotifera, Hexarthridae" />
+            @if (categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched) {
+              <span class="field-error">Category name is required.</span>
+            }
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Taxonomic Rank *</label>
+              <select class="form-select" formControlName="rank">
+                @for (rank of availableRanks; track rank) {
+                  <option [value]="rank">{{ rank }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Parent Category</label>
+              <select class="form-select" formControlName="parentId">
+                <option [ngValue]="null">-- Root / No Parent --</option>
+                @for (cat of flatCategories(); track cat.id) {
+                  <option [ngValue]="cat.id">{{ cat.name }} ({{ cat.rank }})</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Taxon Description</label>
+            <textarea class="form-textarea" formControlName="description" rows="3" placeholder="Phylogenetic description..."></textarea>
+          </div>
+
+          <!-- Category Image (Optional) -->
+          <div class="form-group">
+            <label class="form-label">Category Image (Optional)</label>
+            <input 
+              #categoryFileInput
+              type="file" 
+              class="form-input" 
+              accept="image/png, image/jpeg, image/jpg, image/webp"
+              (change)="onCategoryFileSelected($event)" 
+            />
+            <span class="text-xs text-muted">Supported formats: JPG, PNG, WebP. Optional.</span>
+
+            <!-- Preview of newly selected image -->
+            @if (categoryImagePreview(); as preview) {
+              <div class="category-image-preview-box mt-sm">
+                <div class="preview-header">
+                  <span class="text-xs font-semibold text-primary">Selected Image Preview:</span>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-danger" 
+                    (click)="removeSelectedCategoryImage(categoryFileInput)"
+                  >
+                    ✕ Remove Image
+                  </button>
+                </div>
+                <img [src]="preview" alt="Category image preview" class="category-preview-thumb" />
+              </div>
+            } @else if (existingCategoryImageUrl(); as existingUrl) {
+              <!-- Display existing category image if in edit mode -->
+              <div class="category-image-preview-box mt-sm">
+                <div class="preview-header">
+                  <span class="text-xs font-semibold text-secondary">Current Category Image:</span>
+                </div>
+                <img [src]="existingUrl" alt="Current category image" class="category-preview-thumb" />
+                <span class="text-xs text-muted mt-xs">Select a new file above to replace, or leave blank to keep.</span>
+              </div>
+            }
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeCategoryModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="isSavingCategory()">
+              @if (isSavingCategory()) {
+                <span>Saving...</span>
+              } @else {
+                <span>{{ isEditingCategory() ? 'Save Changes' : 'Create Category' }}</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ================= DELETE CONFIRMATION MODAL ================= -->
+  @if (showDeleteModal()) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+      <div class="modal-card modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title text-danger">⚠️ Confirm Deletion</h2>
+          <button class="modal-close-btn" (click)="closeDeleteModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Are you sure you want to permanently delete this {{ deleteItemType() }}:
+            <strong>"{{ deleteItemName() }}"</strong>?
+          </p>
+          @if (deleteItemType() === 'category') {
+            <p class="text-sm text-danger mt-sm">
+              Note: If this category contains sub-categories or assigned animals, deletion will be blocked by the server to protect data integrity.
+            </p>
+          }
+          @if (deleteItemType() === 'animal') {
+            <p class="text-sm text-danger mt-sm">
+              Note: If this animal has associated gallery images, please remove images or ensure cascade deletion is configured.
+            </p>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+          <button type="button" class="btn btn-danger" [disabled]="isDeleting()" (click)="executeDelete()">
+            @if (isDeleting()) {
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete Permanently</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

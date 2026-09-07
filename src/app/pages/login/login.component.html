@@ -1,0 +1,288 @@
+<div class="auth-page">
+  <div class="auth-container">
+    <!-- Left Side: Wildlife Imagery & Brand Story -->
+    <div class="auth-visual-side">
+      <div class="auth-visual-backdrop"></div>
+      <img 
+        src="https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=1200&q=80" 
+        alt="Majestic Wildlife Lion" 
+        class="auth-bg-img"
+      />
+      <div class="auth-visual-overlay"></div>
+      
+      <div class="auth-visual-content">
+        <div class="visual-badge">
+          <span class="badge-icon">🌿</span>
+          <span>Mohra Taxonomy</span>
+        </div>
+        <h1 class="visual-heading">Discover a world full of life.</h1>
+        <p class="visual-subtext">
+          Explore the fascinating world of animals with Mohra Taxonomy.
+        </p>
+
+        <!-- Wildlife Quote Card -->
+        <div class="visual-card">
+          <div class="quote-icon">“</div>
+          <p class="quote-text">
+            In every walk with nature, one receives far more than he seeks.
+          </p>
+          <div class="quote-author">
+            <span class="author-name">Biodiversity Conservation</span>
+            <span class="author-role">Classification Portal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Authentication Card -->
+    <div class="auth-form-side">
+      <div class="auth-card">
+        <!-- Auth Header -->
+        <div class="auth-header">
+          <div class="mobile-logo-badge">
+            <span class="logo-mark-sm">🌿</span>
+            <span class="logo-text-sm">Mohra Taxonomy</span>
+          </div>
+          <h2 class="auth-title">Welcome Back</h2>
+          <p class="auth-subtitle">Sign in to continue exploring the animal kingdom.</p>
+        </div>
+
+        <!-- Alert Banners -->
+        @if (errorMessage()) {
+          <div class="alert alert-danger" role="alert">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="alert alert-success" role="alert">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>{{ successMessage() }}</span>
+          </div>
+        }
+
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email" class="form-label">
+              <span>Email Address</span>
+              <span class="required-star">*</span>
+            </label>
+            <div class="form-control-wrapper">
+              <span class="field-icon left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </span>
+              <input 
+                id="email"
+                type="email"
+                formControlName="email"
+                class="form-control input-icon-left"
+                [class.is-invalid]="isFieldInvalid('email')"
+                placeholder="name@university.edu"
+                autocomplete="email"
+              />
+            </div>
+            @if (isFieldInvalid('email')) {
+              <div class="error-feedback">
+                @if (loginForm.get('email')?.hasError('required')) {
+                  <span>Email address is required.</span>
+                } @else if (loginForm.get('email')?.hasError('email')) {
+                  <span>Please enter a valid email address.</span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="password" class="form-label mb-0">
+                <span>Password</span>
+                <span class="required-star">*</span>
+              </label>
+              <button 
+                type="button" 
+                class="forgot-link-btn" 
+                (click)="openForgotModal()"
+              >
+                Forgot Password?
+              </button>
+            </div>
+            <div class="form-control-wrapper">
+              <span class="field-icon left">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </span>
+              <input 
+                id="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                class="form-control input-icon-left input-icon-right"
+                [class.is-invalid]="isFieldInvalid('password')"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <button 
+                type="button" 
+                class="field-action-btn"
+                (click)="togglePasswordVisibility()" 
+                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              >
+                @if (showPassword()) {
+                  <!-- Eye Off Icon -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <!-- Eye Open Icon -->
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (isFieldInvalid('password')) {
+              <div class="error-feedback">
+                <span>Password is required.</span>
+              </div>
+            }
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-block btn-lg auth-submit-btn"
+            [disabled]="isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="spinner"></span>
+              <span>Authenticating...</span>
+            } @else {
+              <span>Login</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            }
+          </button>
+        </form>
+
+        <!-- Auth Footer Link -->
+        <div class="auth-card-footer">
+          <p class="switch-auth-text">
+            Don't have an account? 
+            <a routerLink="/register" class="switch-link">Create Account</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FORGOT PASSWORD MODAL ================= -->
+  @if (showForgotModal()) {
+    <div class="modal-backdrop" (click)="closeForgotModal()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <span class="modal-icon">🔐</span>
+            <div>
+              <h3>Reset Your Password</h3>
+              <p class="modal-subtitle">Enter your email and we will send you a secure reset link.</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" (click)="closeForgotModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          @if (forgotSuccessMsg()) {
+            <div class="alert alert-success">
+              <span class="alert-icon">✅</span>
+              <div>
+                <strong>Link Generated!</strong>
+                <p class="mb-0 mt-xs">{{ forgotSuccessMsg() }}</p>
+              </div>
+            </div>
+          }
+
+          @if (forgotErrorMsg()) {
+            <div class="alert alert-danger">
+              <span class="alert-icon">⚠️</span>
+              <div>
+                <p class="mb-0">{{ forgotErrorMsg() }}</p>
+              </div>
+            </div>
+          }
+
+          @if (!forgotSuccessMsg()) {
+            <form [formGroup]="forgotForm" (ngSubmit)="sendResetLink()" novalidate>
+              <div class="form-group">
+                <label for="forgotEmail" class="form-label">
+                  <span>Registered Email Address</span>
+                  <span class="required-star">*</span>
+                </label>
+                <div class="form-control-wrapper">
+                  <span class="field-icon left">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                      <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                  </span>
+                  <input 
+                    id="forgotEmail"
+                    type="email"
+                    formControlName="email"
+                    class="form-control input-icon-left"
+                    placeholder="name@university.edu"
+                    autocomplete="email"
+                  />
+                </div>
+                @if (forgotForm.get('email')?.invalid && (forgotForm.get('email')?.touched || forgotForm.get('email')?.dirty)) {
+                  <div class="error-feedback">
+                    <span>Please enter a valid email address.</span>
+                  </div>
+                }
+              </div>
+
+              <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" (click)="closeForgotModal()">
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary"
+                  [disabled]="isSendingResetLink()"
+                >
+                  @if (isSendingResetLink()) {
+                    <span class="spinner"></span>
+                    <span>Sending Link...</span>
+                  } @else {
+                    <span>Send Reset Link</span>
+                  }
+                </button>
+              </div>
+            </form>
+          } @else {
+            <div class="modal-actions mt-md">
+              <button type="button" class="btn btn-primary btn-block" (click)="closeForgotModal()">
+                Back to Sign In
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+

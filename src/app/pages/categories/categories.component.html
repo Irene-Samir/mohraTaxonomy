@@ -1,0 +1,336 @@
+<div class="categories-page">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="container">
+      <div class="header-content">
+        <div class="badge badge-cumin">Biological Classification</div>
+        <h1 class="page-title">Taxonomy Hierarchy</h1>
+        <p class="page-description">
+          Explore the hierarchical classification of life from Kingdom down to Genus and Species. Expand and collapse branches to navigate phylogenetic lineages, and click <strong>View Animals</strong> on any taxon to inspect all classified species under it.
+        </p>
+
+        <!-- Search and Controls Bar -->
+        <div class="tree-controls-bar">
+          <div class="search-input-group">
+            <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM19 19l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input 
+              type="text" 
+              [ngModel]="searchQuery()" 
+              (ngModelChange)="searchQuery.set($event)"
+              placeholder="Search taxonomy categories by name or rank (e.g. Chordata, Rotifera, Perciformes)..."
+              placeholder="Search categories by name (e.g. Chordata, Mammalia, Canis)..."
+              class="search-input"
+              aria-label="Search taxonomy categories"
+            />
+            @if (searchQuery()) {
+              <button class="clear-search-btn" (click)="clearSearch()" title="Clear search">
+                ✕
+              </button>
+            }
+          </div>
+
+          <!-- Tree Quick Action Buttons -->
+          <div class="tree-actions-row">
+            <button class="btn btn-secondary btn-sm" (click)="expandAll()" title="Expand all branches in tree">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M7 11l5 5 5-5M7 4l5 5 5-5"/>
+              </svg>
+              Expand All
+            </button>
+            <button class="btn btn-secondary btn-sm" (click)="collapseAll()" title="Collapse all branches in tree">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 13l-5-5-5 5M17 20l-5-5-5 5"/>
+              </svg>
+              Collapse All
+            </button>
+          </div>
+        </div>
+
+        <!-- Summary Statistics Pills -->
+        @if (!isLoadingTree() && !treeErrorMessage() && taxonomyTree().length > 0) {
+          <div class="stats-pills-row">
+            <div class="stat-pill">
+              <span class="stat-pill-icon">👑</span>
+              <span class="stat-pill-label">Kingdoms:</span>
+              <span class="stat-pill-val">{{ totalKingdomsCount() }}</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-pill-icon">🧬</span>
+              <span class="stat-pill-label">Total Taxa:</span>
+              <span class="stat-pill-val">{{ totalNodesCount() }}</span>
+            </div>
+            @if (searchQuery().trim()) {
+              <div class="stat-pill search-active-pill">
+                <span class="stat-pill-icon">🔍</span>
+                <span class="stat-pill-label">Search Matches:</span>
+                <span class="stat-pill-val">{{ searchResults().length }}</span>
+                <button class="pill-clear-btn" (click)="clearSearch()" title="Clear search filter">✕</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area: Taxonomy Tree Only -->
+  <main class="container main-categories-container">
+    
+    <!-- Tree Global Error State -->
+    @if (treeErrorMessage()) {
+      <div class="error-state-card card">
+        <div class="error-icon-box">⚠️</div>
+        <h2 class="error-title">Unable to load taxonomy hierarchy</h2>
+        <p class="error-desc">{{ treeErrorMessage() }}</p>
+        <button class="btn btn-primary retry-btn" (click)="loadTaxonomyTree(true)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+          Retry Connection
+        </button>
+      </div>
+    }
+
+    <!-- Loading Skeleton State -->
+    @if (isLoadingTree()) {
+      <div class="tree-skeleton-wrapper card">
+        <div class="loading-mini-banner">
+          <div class="spinner spinner-dark"></div>
+          <span class="loading-text">Loading taxonomy tree hierarchy...</span>
+        </div>
+        @for (item of [1, 2, 3, 4, 5]; track item) {
+          <div class="skeleton-tree-item root">
+            <div class="skeleton-toggle"></div>
+            <div class="skeleton-badge"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+          <div class="skeleton-tree-item child-1">
+            <div class="skeleton-toggle"></div>
+            <div class="skeleton-badge"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Search Results View (When search is active) -->
+    @if (!isLoadingTree() && !treeErrorMessage() && searchQuery().trim()) {
+      <section class="search-results-section card">
+        <div class="search-results-header">
+          <div>
+            <h2 class="search-results-title">
+              Matching Taxa for <span class="highlight-term">"{{ searchQuery().trim() }}"</span>
+            </h2>
+            <p class="search-results-subtitle">
+              Found {{ searchResults().length }} category nodes matching your search term.
+            </p>
+          </div>
+          <button class="btn btn-secondary btn-sm" (click)="clearSearch()">
+            ✕ Clear Search
+          </button>
+        </div>
+
+        @if (searchResults().length === 0) {
+          <div class="no-search-results">
+            <div class="empty-search-icon">🔍</div>
+            <h3>No matching categories found</h3>
+            <p>No taxonomy categories match <strong>"{{ searchQuery().trim() }}"</strong>.</p>
+            <button class="btn btn-secondary btn-sm" (click)="clearSearch()">Reset Search</button>
+          </div>
+        } @else {
+          <div class="search-results-list">
+            @for (result of searchResults(); track result.node.id) {
+              <div class="search-result-row">
+                <div class="search-result-main">
+                  <div class="search-result-tag-row">
+                    <span class="rank-badge" [ngClass]="getRankBadgeClass(result.node.rank)">
+                      <span class="rank-icon">{{ getRankIcon(result.node.rank) }}</span>
+                      <span>{{ result.node.rank }}</span>
+                    </span>
+                    <span class="search-result-name">{{ result.node.name }}</span>
+                    @if (hasChildren(result.node)) {
+                      <span class="sub-taxa-pill">{{ result.node.children.length }} sub-taxa</span>
+                    }
+                  </div>
+
+                  <!-- Full Lineage Path -->
+                  <div class="search-result-path">
+                    <span class="path-icon">↳</span>
+                    <span class="path-text">{{ result.pathDisplay }}</span>
+                  </div>
+                </div>
+
+                <!-- Actions: Favorite + View Animals -->
+                <div class="search-result-action">
+                  <button 
+                    type="button"
+                    class="category-fav-toggle-btn"
+                    [class.active]="isCategoryFavorite(result.node.id)"
+                    (click)="toggleCategoryFavorite(result.node, $event)"
+                    [title]="isCategoryFavorite(result.node.id) ? 'Remove category from favorites' : 'Add category to favorites'"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" [attr.fill]="isCategoryFavorite(result.node.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                  </button>
+
+                  <button 
+                    type="button"
+                    class="btn btn-primary btn-sm view-animals-btn"
+                    (click)="viewAnimals(result.node, $event)"
+                    [title]="'View animals classified under ' + result.node.name"
+                  >
+                    <span>View Animals</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Full Interactive Taxonomy Tree View (When search is empty) -->
+    @if (!isLoadingTree() && !treeErrorMessage() && !searchQuery().trim()) {
+      <div class="taxonomy-tree-card card" role="tree" aria-label="Taxonomic Hierarchy Tree">
+        
+        <!-- Legend of Taxonomic Ranks -->
+        <div class="tree-rank-legend">
+          <span class="legend-title">Taxonomic Ranks:</span>
+          <div class="legend-pills">
+            <span class="rank-badge rank-kingdom">Kingdom</span>
+            <span class="rank-badge rank-phylum">Phylum</span>
+            <span class="rank-badge rank-class">Class</span>
+            <span class="rank-badge rank-order">Order</span>
+            <span class="rank-badge rank-family">Family</span>
+            <span class="rank-badge rank-genus">Genus</span>
+          </div>
+        </div>
+
+        <!-- Root Nodes -->
+        <div class="tree-root-container">
+          @for (rootNode of taxonomyTree(); track rootNode.id) {
+            <ng-container 
+              [ngTemplateOutlet]="taxonomyNodeTemplate" 
+              [ngTemplateOutletContext]="{ node: rootNode, depth: 0 }">
+            </ng-container>
+          }
+        </div>
+
+      </div>
+    }
+
+  </main>
+</div>
+
+<!-- ================= RECURSIVE TAXONOMY NODE TEMPLATE ================= -->
+<ng-template #taxonomyNodeTemplate let-node="node" let-depth="depth">
+  <div 
+    class="tree-node-wrapper" 
+    [class.is-expanded]="isExpanded(node.id)"
+    [class.is-leaf]="!hasChildren(node)"
+    [class.has-children]="hasChildren(node)"
+    [style.--node-depth]="depth"
+    role="treeitem"
+    [attr.aria-expanded]="hasChildren(node) ? isExpanded(node.id) : null"
+    [attr.aria-level]="depth + 1"
+  >
+    <!-- Node Row Card -->
+    <div 
+      class="node-card"
+      [class.has-children]="hasChildren(node)"
+      (click)="toggleNodeExpand(node, $event)"
+      [attr.tabindex]="hasChildren(node) ? 0 : null"
+      (keydown.enter)="toggleNodeExpand(node, $event)"
+      (keydown.space)="toggleNodeExpand(node, $event)"
+    >
+      <!-- Expand/Collapse Button OR Leaf Bullet -->
+      <div class="node-indicator-slot">
+        @if (hasChildren(node)) {
+          <button 
+            type="button"
+            class="toggle-btn"
+            [class.expanded]="isExpanded(node.id)"
+            (click)="toggleNodeExpand(node, $event)"
+            [attr.aria-label]="isExpanded(node.id) ? 'Collapse ' + node.name : 'Expand ' + node.name"
+            title="Toggle branch expand/collapse"
+          >
+            <svg class="chevron-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M6 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        } @else {
+          <span class="leaf-indicator" title="Leaf Category (No sub-ranks)">
+            <span class="leaf-bullet">•</span>
+          </span>
+        }
+      </div>
+
+      <!-- Rank Badge -->
+      <div class="node-rank-slot">
+        <span class="rank-badge" [ngClass]="getRankBadgeClass(node.rank)">
+          <span class="rank-icon">{{ getRankIcon(node.rank) }}</span>
+          <span class="rank-text">{{ node.rank || 'TAXON' }}</span>
+        </span>
+      </div>
+
+      <!-- Taxon Name & Sub-taxa Count -->
+      <div class="node-info-slot">
+        <span class="taxon-name">{{ node.name }}</span>
+        
+        @if (hasChildren(node)) {
+          <span class="children-count-pill" title="Direct sub-taxa count">
+            {{ node.children.length }} {{ node.children.length === 1 ? 'sub-taxon' : 'sub-taxa' }}
+          </span>
+        }
+      </div>
+
+      <!-- Actions: Favorite + View Animals Button Action -->
+      <div class="node-action-slot">
+        <button 
+          type="button"
+          class="category-fav-toggle-btn"
+          [class.active]="isCategoryFavorite(node.id)"
+          (click)="toggleCategoryFavorite(node, $event)"
+          [title]="isCategoryFavorite(node.id) ? 'Remove category from favorites' : 'Add category to favorites'"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" [attr.fill]="isCategoryFavorite(node.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+
+        <button 
+          type="button"
+          class="btn btn-outline btn-sm view-animals-node-btn"
+          (click)="viewAnimals(node, $event)"
+          [title]="'View animals in ' + node.name + ' and descendant categories'"
+        >
+          <span>View Animals</span>
+          <svg class="arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recursive Sub-tree for Children -->
+    @if (hasChildren(node) && isExpanded(node.id)) {
+      <div class="tree-children-container" role="group">
+        @for (childNode of node.children; track childNode.id) {
+          <ng-container 
+            [ngTemplateOutlet]="taxonomyNodeTemplate" 
+            [ngTemplateOutletContext]="{ node: childNode, depth: depth + 1 }">
+          </ng-container>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
