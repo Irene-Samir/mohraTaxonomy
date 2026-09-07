@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  baseUrl: 'http://mohrataxonomy.runasp.net',
-  apiUrl: 'http://mohrataxonomy.runasp.net/api'
+  baseUrl: 'https://mohrataxonomy.runasp.net',
+  apiUrl: 'https://mohrataxonomy.runasp.net/api'
 };
 
