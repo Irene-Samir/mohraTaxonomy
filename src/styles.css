@@ -457,6 +457,13 @@ img {
   color: var(--success-green);
 }
 
+.alert-info {
+  background-color: var(--warm-cumin-light);
+  border: 1px solid var(--warm-cumin-border);
+  color: #7A531A;
+}
+
+
 /* Badges & Pills */
 .badge {
   display: inline-flex;

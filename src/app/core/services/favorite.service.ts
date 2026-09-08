@@ -1,9 +1,11 @@
 import { Injectable, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { ToastService } from './toast.service';
 import { environment } from '../../../environments/environment';
 
 export interface FavoriteAnimal {
@@ -35,6 +37,8 @@ export class FavoriteService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   private readonly storageKey = 'mohra_favorites';
 
@@ -43,12 +47,21 @@ export class FavoriteService {
   public favoriteCategoryIdsSignal = signal<Set<number>>(new Set<number>());
 
   constructor() {
-    // Initial sync
     if (this.isBrowser()) {
-      this.loadLocalFavorites();
+      // Remove any legacy guest favorites stored in localStorage
+      try {
+        localStorage.removeItem(this.storageKey);
+      } catch {}
+
       this.authService.isAuthenticated$.subscribe(isAuth => {
         if (isAuth) {
           this.refreshFavorites();
+        } else {
+          this.favoriteAnimalIdsSignal.set(new Set<number>());
+          this.favoriteCategoryIdsSignal.set(new Set<number>());
+          try {
+            localStorage.removeItem(this.storageKey);
+          } catch {}
         }
       });
     }
@@ -56,6 +69,20 @@ export class FavoriteService {
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);
+  }
+
+  /**
+   * Notify unauthenticated user and redirect to login page
+   */
+  public promptLogin(message: string): void {
+    this.toastService.show(message, 'warning');
+    const returnUrl = this.router.url;
+    this.router.navigate(['/login'], {
+      queryParams: {
+        returnUrl: returnUrl && returnUrl !== '/login' ? returnUrl : '/animals',
+        message
+      }
+    });
   }
 
   /**
@@ -88,12 +115,16 @@ export class FavoriteService {
    * GET /api/FavoriteAnimals
    */
   getFavoriteAnimals(): Observable<FavoriteAnimal[]> {
+    if (!this.authService.isAuthenticated()) {
+      this.favoriteAnimalIdsSignal.set(new Set<number>());
+      return of([]);
+    }
+
     return this.http.get<FavoriteAnimal[]>(`${this.apiUrl}/FavoriteAnimals`).pipe(
       tap(list => {
         if (Array.isArray(list)) {
           const ids = new Set(list.map(f => f.animalId));
           this.favoriteAnimalIdsSignal.set(ids);
-          this.saveLocalFavorites(Array.from(ids));
         }
       }),
       catchError(error => this.handleError(error, 'Unable to load favorite animals.'))
@@ -105,12 +136,16 @@ export class FavoriteService {
    * POST /api/FavoriteAnimals
    */
   addFavoriteAnimal(animalId: number): Observable<any> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to add animals to your favorites.');
+      return throwError(() => new Error('Please log in to add animals to your favorites.'));
+    }
+
     return this.http.post(`${this.apiUrl}/FavoriteAnimals`, { animalId }, { responseType: 'text' }).pipe(
       tap(() => {
         const current = new Set(this.favoriteAnimalIdsSignal());
         current.add(animalId);
         this.favoriteAnimalIdsSignal.set(current);
-        this.saveLocalFavorites(Array.from(current));
       }),
       catchError(error => this.handleError(error, 'Unable to add animal to favorites.'))
     );
@@ -121,12 +156,16 @@ export class FavoriteService {
    * DELETE /api/FavoriteAnimals/{animalId}
    */
   removeFavoriteAnimal(animalId: number): Observable<any> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to manage your favorites.');
+      return throwError(() => new Error('Please log in to manage your favorites.'));
+    }
+
     return this.http.delete(`${this.apiUrl}/FavoriteAnimals/${animalId}`).pipe(
       tap(() => {
         const current = new Set(this.favoriteAnimalIdsSignal());
         current.delete(animalId);
         this.favoriteAnimalIdsSignal.set(current);
-        this.saveLocalFavorites(Array.from(current));
       }),
       catchError(error => this.handleError(error, 'Unable to remove animal from favorites.'))
     );
@@ -136,6 +175,9 @@ export class FavoriteService {
    * Check if animal ID is marked as favorite
    */
   isFavorite(animalId: number): boolean {
+    if (!this.authService.isAuthenticated()) {
+      return false;
+    }
     return this.favoriteAnimalIdsSignal().has(animalId);
   }
 
@@ -143,23 +185,20 @@ export class FavoriteService {
    * Toggle animal favorite state
    */
   toggleFavorite(animalId: number): Observable<boolean> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to add animals to your favorites.');
+      return of(false);
+    }
+
     if (this.isFavorite(animalId)) {
       return this.removeFavoriteAnimal(animalId).pipe(
         map(() => false),
-        catchError(() => {
-          // If unauthenticated or offline, toggle locally
-          this.toggleLocalAnimal(animalId);
-          return of(false);
-        })
+        catchError(() => of(false))
       );
     } else {
       return this.addFavoriteAnimal(animalId).pipe(
         map(() => true),
-        catchError(() => {
-          // If unauthenticated or offline, toggle locally
-          this.toggleLocalAnimal(animalId);
-          return of(true);
-        })
+        catchError(() => of(false))
       );
     }
   }
@@ -171,6 +210,11 @@ export class FavoriteService {
    * GET /api/FavoriteCategories
    */
   getFavoriteCategories(): Observable<FavoriteCategory[]> {
+    if (!this.authService.isAuthenticated()) {
+      this.favoriteCategoryIdsSignal.set(new Set<number>());
+      return of([]);
+    }
+
     return this.http.get<FavoriteCategory[]>(`${this.apiUrl}/FavoriteCategories`).pipe(
       tap(list => {
         if (Array.isArray(list)) {
@@ -187,6 +231,11 @@ export class FavoriteService {
    * POST /api/FavoriteCategories
    */
   addFavoriteCategory(categoryId: number): Observable<any> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to add categories to your favorites.');
+      return throwError(() => new Error('Please log in to add categories to your favorites.'));
+    }
+
     return this.http.post(`${this.apiUrl}/FavoriteCategories`, { categoryId }, { responseType: 'text' }).pipe(
       tap(() => {
         const current = new Set(this.favoriteCategoryIdsSignal());
@@ -202,6 +251,11 @@ export class FavoriteService {
    * DELETE /api/FavoriteCategories/{categoryId}
    */
   removeFavoriteCategory(categoryId: number): Observable<any> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to manage your favorites.');
+      return throwError(() => new Error('Please log in to manage your favorites.'));
+    }
+
     return this.http.delete(`${this.apiUrl}/FavoriteCategories/${categoryId}`).pipe(
       tap(() => {
         const current = new Set(this.favoriteCategoryIdsSignal());
@@ -216,6 +270,9 @@ export class FavoriteService {
    * Check if category ID is marked as favorite
    */
   isCategoryFavorite(categoryId: number): boolean {
+    if (!this.authService.isAuthenticated()) {
+      return false;
+    }
     return this.favoriteCategoryIdsSignal().has(categoryId);
   }
 
@@ -223,54 +280,29 @@ export class FavoriteService {
    * Toggle category favorite state
    */
   toggleFavoriteCategory(categoryId: number): Observable<boolean> {
+    if (!this.authService.isAuthenticated()) {
+      this.promptLogin('Please log in to add categories to your favorites.');
+      return of(false);
+    }
+
     if (this.isCategoryFavorite(categoryId)) {
-      return this.removeFavoriteCategory(categoryId).pipe(map(() => false));
+      return this.removeFavoriteCategory(categoryId).pipe(
+        map(() => false),
+        catchError(() => of(false))
+      );
     } else {
-      return this.addFavoriteCategory(categoryId).pipe(map(() => true));
+      return this.addFavoriteCategory(categoryId).pipe(
+        map(() => true),
+        catchError(() => of(false))
+      );
     }
-  }
-
-  // ================= LOCAL FALLBACK =================
-
-  private loadLocalFavorites(): void {
-    try {
-      const stored = localStorage.getItem(this.storageKey);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          const ids = parsed.map((id: any) => Number(id)).filter((id: number) => !isNaN(id));
-          this.favoriteAnimalIdsSignal.set(new Set(ids));
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  private saveLocalFavorites(ids: number[]): void {
-    if (!this.isBrowser()) return;
-    try {
-      localStorage.setItem(this.storageKey, JSON.stringify(ids));
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  private toggleLocalAnimal(animalId: number): void {
-    const current = new Set(this.favoriteAnimalIdsSignal());
-    if (current.has(animalId)) {
-      current.delete(animalId);
-    } else {
-      current.add(animalId);
-    }
-    this.favoriteAnimalIdsSignal.set(current);
-    this.saveLocalFavorites(Array.from(current));
   }
 
   private handleError(error: HttpErrorResponse, defaultMsg: string): Observable<never> {
     let msg = defaultMsg;
     if (error.status === 401) {
       msg = 'Please sign in to manage your favorites.';
+      this.promptLogin('Please log in to add animals to your favorites.');
     } else if (error.status === 0) {
       msg = `Unable to connect to the server at ${environment.baseUrl}. Please verify the API is running.`;
     } else if (error.error && typeof error.error === 'string') {

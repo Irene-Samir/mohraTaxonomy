@@ -1,4 +1,23 @@
 <div class="app-layout">
+  <!-- Global Toast Notification -->
+  @if (toastService.currentToast(); as toast) {
+    <div class="toast-container" [class]="'toast-' + toast.type" role="status" aria-live="polite">
+      <div class="toast-card">
+        <span class="toast-icon">
+          @if (toast.type === 'warning' || toast.type === 'info') {
+            🔔
+          } @else if (toast.type === 'success') {
+            ✅
+          } @else {
+            ⚠️
+          }
+        </span>
+        <span class="toast-text">{{ toast.text }}</span>
+        <button type="button" class="toast-close" (click)="toastService.clear()" aria-label="Close notification">✕</button>
+      </div>
+    </div>
+  }
+
   <app-navbar />
   <main class="main-content">
     <router-outlet />

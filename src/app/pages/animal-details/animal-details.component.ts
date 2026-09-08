@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AnimalService, AnimalFullDetail, AnimalImage, AnimalDescription } from '../../core/services/animal.service';
 import { FavoriteService } from '../../core/services/favorite.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-animal-details',
@@ -16,6 +18,8 @@ export class AnimalDetailsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly animalService = inject(AnimalService);
   private readonly favoriteService = inject(FavoriteService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
 
   animalId = signal<number | null>(null);
   animal = signal<AnimalFullDetail | null>(null);
@@ -183,9 +187,21 @@ export class AnimalDetailsComponent implements OnInit {
   // Favorites
   toggleFavorite(): void {
     const a = this.animal();
-    if (a) {
-      this.favoriteService.toggleFavorite(a.id).subscribe();
+    if (!a) return;
+
+    if (!this.authService.isAuthenticated()) {
+      const returnUrl = this.router.url;
+      this.toastService.show('Please log in to add animals to your favorites.', 'warning');
+      this.router.navigate(['/login'], {
+        queryParams: {
+          returnUrl: returnUrl && returnUrl !== '/login' ? returnUrl : `/animals/${a.id}`,
+          message: 'Please log in to add animals to your favorites.'
+        }
+      });
+      return;
     }
+
+    this.favoriteService.toggleFavorite(a.id).subscribe();
   }
 
   isFavorite(): boolean {

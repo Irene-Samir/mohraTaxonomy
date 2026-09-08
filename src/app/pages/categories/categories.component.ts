@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TaxonomyService, TaxonomyNode } from '../../core/services/taxonomy.service';
 import { FavoriteService } from '../../core/services/favorite.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 export interface SearchTaxonResult {
   node: TaxonomyNode;
@@ -21,6 +23,8 @@ export interface SearchTaxonResult {
 export class CategoriesComponent implements OnInit {
   private readonly taxonomyService = inject(TaxonomyService);
   private readonly favoriteService = inject(FavoriteService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
 
   // Taxonomy Tree state
@@ -129,6 +133,17 @@ export class CategoriesComponent implements OnInit {
   toggleCategoryFavorite(node: TaxonomyNode, event?: Event): void {
     if (event) {
       event.stopPropagation();
+    }
+    if (!this.authService.isAuthenticated()) {
+      const returnUrl = this.router.url;
+      this.toastService.show('Please log in to add categories to your favorites.', 'warning');
+      this.router.navigate(['/login'], {
+        queryParams: {
+          returnUrl: returnUrl && returnUrl !== '/login' ? returnUrl : '/categories',
+          message: 'Please log in to add categories to your favorites.'
+        }
+      });
+      return;
     }
     this.favoriteService.toggleFavoriteCategory(node.id).subscribe();
   }

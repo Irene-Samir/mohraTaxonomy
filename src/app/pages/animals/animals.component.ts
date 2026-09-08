@@ -13,6 +13,8 @@ import {
 
 import { FavoriteService } from '../../core/services/favorite.service';
 import { TaxonomyService, TaxonomyNode } from '../../core/services/taxonomy.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 interface AnimalCardVM extends Animal {
   firstImageUrl: string | null;
@@ -31,6 +33,8 @@ export class AnimalsComponent implements OnInit, OnDestroy {
   private readonly animalService = inject(AnimalService);
   private readonly taxonomyService = inject(TaxonomyService);
   private readonly favoriteService = inject(FavoriteService);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroy$ = new Subject<void>();
@@ -364,6 +368,17 @@ export class AnimalsComponent implements OnInit, OnDestroy {
 
   toggleFavorite(event: Event, animalId: number): void {
     event.stopPropagation();
+    if (!this.authService.isAuthenticated()) {
+      const returnUrl = this.router.url;
+      this.toastService.show('Please log in to add animals to your favorites.', 'warning');
+      this.router.navigate(['/login'], {
+        queryParams: {
+          returnUrl: returnUrl && returnUrl !== '/login' ? returnUrl : '/animals',
+          message: 'Please log in to add animals to your favorites.'
+        }
+      });
+      return;
+    }
     this.favoriteService.toggleFavorite(animalId).subscribe();
   }
 

@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NavbarComponent } from './navbar.component';
 import { AuthService, User } from '../../core/services/auth.service';
 
@@ -9,7 +10,7 @@ describe('NavbarComponent', () => {
   let mockAuthService: {
     isAuthenticated$: BehaviorSubject<boolean>;
     currentUser$: BehaviorSubject<User | null>;
-    logout: jasmine.Spy;
+    logout: any;
   };
 
   beforeEach(async () => {
@@ -20,7 +21,7 @@ describe('NavbarComponent', () => {
         fullName: 'Admin User',
         roles: ['Admin']
       }),
-      logout: jasmine.createSpy('logout')
+      logout: vi.fn()
     };
 
     await TestBed.configureTestingModule({
@@ -44,11 +45,11 @@ describe('NavbarComponent', () => {
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
-    expect(component.isUserDropdownOpen()).toBeFalse();
+    expect(component.isUserDropdownOpen()).toBe(false);
     component.toggleUserDropdown();
-    expect(component.isUserDropdownOpen()).toBeTrue();
+    expect(component.isUserDropdownOpen()).toBe(true);
     component.toggleUserDropdown();
-    expect(component.isUserDropdownOpen()).toBeFalse();
+    expect(component.isUserDropdownOpen()).toBe(false);
   });
 
   it('should detect admin user correctly', () => {
@@ -56,7 +57,7 @@ describe('NavbarComponent', () => {
     const component = fixture.componentInstance;
     fixture.detectChanges();
 
-    expect(component.isAdmin()).toBeTrue();
+    expect(component.isAdmin()).toBe(true);
   });
 
   it('should call logout and close dropdown when onLogout is invoked', () => {
@@ -65,8 +66,7 @@ describe('NavbarComponent', () => {
     component.isUserDropdownOpen.set(true);
 
     component.onLogout();
-    expect(component.isUserDropdownOpen()).toBeFalse();
+    expect(component.isUserDropdownOpen()).toBe(false);
     expect(mockAuthService.logout).toHaveBeenCalled();
   });
 });
-
